@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二维码修复测试</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: chart.googleapis.com; connect-src 'self' https:;">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-btn:hover {
+            background: #357ABD;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .qr-container {
+            margin: 10px 0;
+            text-align: center;
+            min-height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>二维码修复测试</h1>
+
+    <div class="test-box">
+        <h3>QRCode库测试</h3>
+        <button class="test-btn" onclick="testQRCodeLibrary()">检查QRCode库</button>
+        <div id="libraryResult" class="result">点击按钮检查QRCode库...</div>
+    </div>
+
+    <div class="test-box">
+        <h3>二维码生成测试</h3>
+        <button class="test-btn" onclick="testQRCode('https://github.com')">测试GitHub</button>
+        <button class="test-btn" onclick="testQRCode('https://www.google.com')">测试Google</button>
+        <button class="test-btn" onclick="testQRCode('https://example.com/test/with/params?q=search')">测试带参数URL</button>
+        <button class="test-btn" onclick="testQRCode('测试中文内容')">测试中文内容</button>
+
+        <div id="qrResult" class="result">点击按钮测试二维码生成...</div>
+        <div id="qrContainer" class="qr-container">等待生成二维码...</div>
+    </div>
+
+    <!-- QRCode 生成库 - 本地文件 -->
+    <script src="qrcode.min.js"></script>
+
+    <script>
+        function testQRCodeLibrary() {
+            const resultDiv = document.getElementById('libraryResult');
+
+            if (typeof qrcode !== 'undefined') {
+                resultDiv.innerHTML = '<span class="success">✅ QRCode库已加载</span>';
+                console.log('QRCode库检查成功');
+            } else {
+                resultDiv.innerHTML = '<span class="error">❌ QRCode库未加载</span>';
+                console.error('QRCode库检查失败');
+            }
+        }
+
+        function testQRCode(text) {
+            console.log('测试二维码生成:', text);
+            const resultDiv = document.getElementById('qrResult');
+            const qrContainer = document.getElementById('qrContainer');
+
+            resultDiv.innerHTML = '正在生成二维码...';
+            qrContainer.innerHTML = '';
+
+            try {
+                if (typeof qrcode === 'undefined') {
+                    throw new Error('QRCode库未加载');
+                }
+
+                // 使用本地qrcode-generator库生成二维码
+                const typeNumber = 0; // 自动检测版本
+                const errorCorrectionLevel = 'H'; // 高容错级别
+                const qr = qrcode(typeNumber, errorCorrectionLevel);
+                qr.addData(text);
+                qr.make();
+
+                console.log('二维码数据生成成功，模块数量:', qr.getModuleCount());
+
+                // 创建二维码显示区域
+                const qrDisplay = document.createElement('div');
+                qrDisplay.style.cssText = 'display: inline-block; padding: 16px; background: white; border-radius: 8px; border: 1px solid #ddd;';
+
+                const qrSize = 200;
+                const cellSize = Math.floor(qrSize / qr.getModuleCount());
+                const actualSize = cellSize * qr.getModuleCount();
+
+                console.log('二维码尺寸:', actualSize, 'x', actualSize, '单元格大小:', cellSize);
+
+                // 创建canvas来绘制二维码
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = actualSize;
+                canvas.height = actualSize;
+
+                // 绘制二维码
+                for (let row = 0; row < qr.getModuleCount(); row++) {
+                    for (let col = 0; col < qr.getModuleCount(); col++) {
+                        ctx.fillStyle = qr.isDark(row, col) ? '#000000' : '#FFFFFF';
+                        ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+                    }
+                }
+
+                qrDisplay.appendChild(canvas);
+                qrContainer.appendChild(qrDisplay);
+
+                resultDiv.innerHTML = '<span class="success">✅ 二维码生成成功</span>';
+                console.log('二维码生成成功');
+
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ 二维码生成失败: ${error.message}</span>`;
+                console.error('二维码生成异常:', error);
+
+                qrContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #666;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">📱</div>
+                        <div>二维码生成失败</div>
+                        <div style="font-size: 12px; margin-top: 8px;">错误: ${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 页面加载完成后自动检查QRCode库
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('页面加载完成，开始检查QRCode库...');
+            testQRCodeLibrary();
+        });
+    </script>
+</body>
+</html>

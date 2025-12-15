@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单二维码测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-btn:hover {
+            background: #357ABD;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .qr-container {
+            margin: 10px 0;
+            text-align: center;
+        }
+        .qr-container img {
+            border: 1px solid #ddd;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>简单二维码测试</h1>
+
+    <div class="test-box">
+        <h3>测试Google Charts API</h3>
+        <button class="test-btn" onclick="testGoogleAPI('https://github.com')">测试GitHub</button>
+        <button class="test-btn" onclick="testGoogleAPI('https://www.google.com')">测试Google</button>
+        <button class="test-btn" onclick="testGoogleAPI('https://example.com/test/with/params?q=search')">测试带参数URL</button>
+
+        <div id="googleResult" class="result">点击按钮测试...</div>
+        <div id="googleQR" class="qr-container"></div>
+    </div>
+
+    <div class="test-box">
+        <h3>复制链接测试</h3>
+        <button class="test-btn" onclick="testCopy('https://github.com')">测试复制GitHub链接</button>
+        <button class="test-btn" onclick="testCopy('https://www.google.com/search?q=test')">测试复制搜索链接</button>
+
+        <div id="copyResult" class="result">点击按钮测试复制...</div>
+    </div>
+
+    <script>
+        function testGoogleAPI(url) {
+            console.log('测试Google API:', url);
+            const resultDiv = document.getElementById('googleResult');
+            const qrDiv = document.getElementById('googleQR');
+
+            resultDiv.textContent = '正在生成二维码...';
+            qrDiv.innerHTML = '';
+
+            const img = document.createElement('img');
+            img.alt = '二维码';
+            img.style.width = '200px';
+            img.style.height = '200px';
+            img.style.borderRadius = '8px';
+            img.style.border = '1px solid #e0e0e0';
+            img.style.padding = '8px';
+            img.style.background = 'white';
+
+            const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(url)}&chld=H|1`;
+
+            img.onload = () => {
+                resultDiv.innerHTML = '<span style="color: green;">✅ 二维码生成成功</span>';
+                qrDiv.appendChild(img);
+                console.log('二维码生成成功');
+            };
+
+            img.onerror = () => {
+                resultDiv.innerHTML = '<span style="color: red;">❌ 二维码生成失败</span>';
+                console.error('二维码生成失败');
+            };
+
+            img.src = qrUrl;
+
+            // 3秒超时
+            setTimeout(() => {
+                if (!img.complete || img.naturalWidth === 0) {
+                    img.onerror();
+                }
+            }, 3000);
+        }
+
+        function testCopy(text) {
+            console.log('测试复制:', text);
+            const resultDiv = document.getElementById('copyResult');
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        resultDiv.innerHTML = '<span style="color: green;">✅ 复制成功</span>';
+                        console.log('复制成功');
+                    }).catch(() => {
+                        fallbackCopy(text);
+                    });
+                } else {
+                    fallbackCopy(text);
+                }
+            } catch (error) {
+                console.error('复制异常:', error);
+                fallbackCopy(text);
+            }
+
+            function fallbackCopy(text) {
+                try {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+
+                    if (successful) {
+                        resultDiv.innerHTML = '<span style="color: green;">✅ 复制成功（降级方案）</span>';
+                        console.log('复制成功（降级方案）');
+                    } else {
+                        resultDiv.innerHTML = '<span style="color: red;">❌ 复制失败</span>';
+                        console.error('复制失败');
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML = '<span style="color: red;">❌ 复制异常</span>';
+                    console.error('复制异常:', error);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

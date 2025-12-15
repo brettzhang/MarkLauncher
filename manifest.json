@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "MarkLauncher - 书签启动器",
+  "description": "一个简洁高效的新标签页书签启动器，左侧显示文件夹分类，右侧显示书签详情",
+  "version": "1.0.0",
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "permissions": [
+    "bookmarks",
+    "storage"
+  ],
+  "icons": {
+    "16": "icons/icon.svg",
+    "48": "icons/icon.svg",
+    "128": "icons/icon.svg"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "MarkLauncher设置"
+  }
+}

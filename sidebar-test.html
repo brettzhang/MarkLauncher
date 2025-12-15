@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>侧边栏测试</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-info {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4A90E2;
+        }
+        .test-section {
+            margin-bottom: 30px;
+        }
+        .test-btn {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-btn:hover {
+            background: #357ABD;
+        }
+    </style>
+</head>
+<body>
+    <h1>侧边栏显示测试</h1>
+
+    <div class="test-info">
+        <h3>🔍 诊断信息</h3>
+        <p>此页面用于测试侧边栏的显示和切换功能。</p>
+        <ul>
+            <li>默认状态：侧边栏应该隐藏，切换按钮在左边缘可见</li>
+            <li>点击切换按钮：侧边栏应该从左侧滑入</li>
+            <li>再次点击：侧边栏应该滑出隐藏</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h3>🧪 测试控件</h3>
+        <button class="test-btn" onclick="toggleSidebar()">手动切换侧边栏</button>
+        <button class="test-btn" onclick="checkSidebarState()">检查侧边栏状态</button>
+        <button class="test-btn" onclick="clearSidebarState()">清除本地存储</button>
+        <div id="statusInfo" style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;"></div>
+    </div>
+
+    <!-- 复制主界面的布局结构 -->
+    <main class="main-layout" style="height: 400px; border: 2px solid #ddd; border-radius: 8px;">
+        <!-- 左侧二级导航区域 -->
+        <aside class="secondary-navigation">
+            <button class="sidebar-toggle" id="sidebarToggle" title="切换侧边栏">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <div class="nav-header">
+                <h2>测试文件夹</h2>
+                <span class="folder-count">5</span>
+            </div>
+            <nav class="folder-navigation">
+                <ul class="folder-nav-list">
+                    <li class="folder-nav-item active">📁 所有书签</li>
+                    <li class="folder-nav-item">📁 工作相关</li>
+                    <li class="folder-nav-item">📁 学习资料</li>
+                    <li class="folder-nav-item">📁 娱乐网站</li>
+                    <li class="folder-nav-item">📁 开发工具</li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- 右侧内容区域 -->
+        <section class="bookmark-content">
+            <div style="padding: 20px; text-align: center; color: #666;">
+                <h3>右侧内容区域</h3>
+                <p>这里是书签列表的显示区域</p>
+                <p>点击左侧的箭头按钮来切换侧边栏</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.secondary-navigation');
+            if (!sidebar) {
+                updateStatus('❌ 未找到侧边栏元素');
+                return;
+            }
+
+            const isOpen = sidebar.classList.contains('open');
+
+            if (isOpen) {
+                sidebar.classList.remove('open');
+                updateStatus('✅ 侧边栏已隐藏');
+            } else {
+                sidebar.classList.add('open');
+                updateStatus('✅ 侧边栏已显示');
+            }
+
+            // 保存状态
+            localStorage.setItem('sidebarOpen', !isOpen);
+        }
+
+        function checkSidebarState() {
+            const sidebar = document.querySelector('.secondary-navigation');
+            const isOpen = sidebar ? sidebar.classList.contains('open') : false;
+            const storedState = localStorage.getItem('sidebarOpen');
+
+            updateStatus(`
+                侧边栏元素: ${sidebar ? '✅ 存在' : '❌ 不存在'}<br>
+                当前显示状态: ${isOpen ? '✅ 显示' : '❌ 隐藏'}<br>
+                本地存储状态: ${storedState === 'true' ? '✅ 显示' : '❌ 隐藏'}<br>
+                CSS transform: ${sidebar ? getComputedStyle(sidebar).transform : 'N/A'}
+            `);
+        }
+
+        function clearSidebarState() {
+            localStorage.removeItem('sidebarOpen');
+            const sidebar = document.querySelector('.secondary-navigation');
+            if (sidebar) {
+                sidebar.classList.remove('open');
+            }
+            updateStatus('🗑️ 本地存储已清除，侧边栏已重置为隐藏状态');
+        }
+
+        function updateStatus(message) {
+            const statusInfo = document.getElementById('statusInfo');
+            if (statusInfo) {
+                statusInfo.innerHTML = message;
+            }
+        }
+
+        // 绑定切换按钮事件
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', toggleSidebar);
+            }
+
+            // 初始化状态
+            const sidebarOpen = localStorage.getItem('sidebarOpen') === 'true';
+            const sidebar = document.querySelector('.secondary-navigation');
+            if (sidebar && sidebarOpen) {
+                sidebar.classList.add('open');
+            }
+
+            checkSidebarState();
+        });
+    </script>
+</body>
+</html>

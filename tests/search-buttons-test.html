@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索按钮同步测试</title>
+    <style>
+        body {
+            margin: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4A90E2;
+        }
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 600px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 8px;
+            border: 1px solid #e9ecef;
+            margin: 15px 0;
+        }
+        .search-mode-toggle {
+            display: flex;
+            background-color: white;
+            border-radius: 6px;
+            padding: 2px;
+            border: 1px solid #e9ecef;
+        }
+        .mode-btn {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border: none;
+            background: none;
+            color: #6c757d;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .mode-btn:hover {
+            color: #212529;
+        }
+        .mode-btn.active {
+            background-color: #4A90E2;
+            color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .search-input {
+            flex: 1;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: white;
+        }
+        .btn {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px 5px 5px 0;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #357ABD;
+        }
+        .engine-selector {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .engine-option {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            background: white;
+            transition: all 0.2s;
+        }
+        .engine-option.active {
+            border-color: #4A90E2;
+            background: rgba(74, 144, 226, 0.1);
+        }
+        .result {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        h1 { color: #333; }
+        h2 { color: #4A90E2; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 搜索按钮同步更新测试</h1>
+
+        <div class="test-section">
+            <h2>搜索栏演示</h2>
+            <p>模拟搜索栏的按钮同步更新功能。</p>
+
+            <div class="search-container">
+                <div class="search-mode-toggle">
+                    <button class="mode-btn active" onclick="switchMode('bookmark')" id="bookmarkBtn">书签</button>
+                    <button class="mode-btn" onclick="switchMode('web')" id="webBtn">Google</button>
+                </div>
+                <input type="text" class="search-input" id="searchInput" placeholder="搜索书签..." readonly>
+            </div>
+
+            <div id="modeResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>搜索引擎选择</h2>
+            <p>选择不同的搜索引擎，观察按钮文本的变化。</p>
+
+            <div class="engine-selector">
+                <div class="engine-option active" onclick="selectEngine('google')" id="googleOption">
+                    🔍 Google
+                </div>
+                <div class="engine-option" onclick="selectEngine('bing')" id="bingOption">
+                    🅱️ Bing
+                </div>
+                <div class="engine-option" onclick="selectEngine('baidu')" id="baiduOption">
+                    🅱️ 百度
+                </div>
+            </div>
+
+            <button class="btn" onclick="testEngineUpdate()">测试引擎更新</button>
+            <button class="btn" onclick="testModeSwitch()">测试模式切换</button>
+
+            <div id="engineResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>自动化测试</h2>
+            <p>测试所有搜索引擎和模式组合。</p>
+
+            <button class="btn" onclick="runFullTest()">运行完整测试</button>
+
+            <div id="fullTestResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>预期行为</h2>
+            <ul>
+                <li><strong>书签模式按钮</strong>：始终显示"书签"</li>
+                <li><strong>网络搜索按钮</strong>：根据设置显示当前搜索引擎（Google/Bing/百度）</li>
+                <li><strong>设置更改后</strong>：网络搜索按钮文本立即更新</li>
+                <li><strong>搜索栏提示词</strong>：在网络搜索模式下显示对应的搜索引擎名称</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 模拟应用状态
+        let searchMode = 'bookmark';
+        let searchEngine = 'google';
+
+        const searchEngineNames = {
+            google: 'Google',
+            bing: 'Bing',
+            baidu: '百度'
+        };
+
+        function switchMode(mode) {
+            searchMode = mode;
+
+            // 更新按钮状态
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            if (mode === 'bookmark') {
+                document.getElementById('bookmarkBtn').classList.add('active');
+            } else {
+                document.getElementById('webBtn').classList.add('active');
+            }
+
+            updatePlaceholder();
+            showResult(`切换到${mode === 'bookmark' ? '书签搜索' : '网络搜索'}模式`, 'modeResult');
+        }
+
+        function selectEngine(engine) {
+            searchEngine = engine;
+
+            // 更新引擎选择状态
+            document.querySelectorAll('.engine-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            document.getElementById(engine + 'Option').classList.add('active');
+
+            updateWebButton();
+            updatePlaceholder();
+            showResult(`选择搜索引擎: ${searchEngineNames[engine]}`, 'engineResult');
+        }
+
+        function updateWebButton() {
+            const webBtn = document.getElementById('webBtn');
+            const currentEngine = searchEngineNames[searchEngine] || 'Google';
+            webBtn.textContent = currentEngine;
+        }
+
+        function updatePlaceholder() {
+            const searchInput = document.getElementById('searchInput');
+            const currentEngine = searchEngineNames[searchEngine] || 'Google';
+
+            if (searchMode === 'bookmark') {
+                searchInput.placeholder = '搜索书签...';
+            } else {
+                searchInput.placeholder = `在 ${currentEngine} 中搜索...`;
+            }
+        }
+
+        function testEngineUpdate() {
+            const engine = searchEngine;
+            const button = document.getElementById('webBtn').textContent;
+            const placeholder = document.getElementById('searchInput').placeholder;
+
+            showResult(`当前引擎: ${engine}, 按钮文本: "${button}", 提示词: "${placeholder}"`, 'engineResult');
+        }
+
+        function testModeSwitch() {
+            const mode = searchMode;
+            const activeBtn = document.querySelector('.mode-btn.active').textContent;
+            const placeholder = document.getElementById('searchInput').placeholder;
+
+            showResult(`当前模式: ${mode}, 活跃按钮: "${activeBtn}", 提示词: "${placeholder}"`, 'engineResult');
+        }
+
+        function runFullTest() {
+            const tests = [];
+            const engines = ['google', 'bing', 'baidu'];
+            const modes = ['bookmark', 'web'];
+
+            engines.forEach(engine => {
+                selectEngine(engine);
+                modes.forEach(mode => {
+                    switchMode(mode);
+
+                    const button = document.getElementById('webBtn').textContent;
+                    const placeholder = document.getElementById('searchInput').placeholder;
+                    const activeBtn = document.querySelector('.mode-btn.active').textContent;
+
+                    tests.push(`引擎: ${engine}, 模式: ${mode}`);
+                    tests.push(`  - 网络按钮: "${button}"`);
+                    tests.push(`  - 活跃按钮: "${activeBtn}"`);
+                    tests.push(`  - 提示词: "${placeholder}"`);
+                    tests.push('');
+                });
+            });
+
+            showResult('完整测试结果:\n' + tests.join('\n'), 'fullTestResult');
+
+            // 恢复初始状态
+            selectEngine('google');
+            switchMode('bookmark');
+        }
+
+        function showResult(message, elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            element.style.display = 'block';
+
+            // 5秒后隐藏结果
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateWebButton();
+            updatePlaceholder();
+            showResult('搜索按钮同步测试页面已加载', 'modeResult');
+        });
+    </script>
+</body>
+</html>

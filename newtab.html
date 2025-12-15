@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarkLauncher - 书签启动器</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: chart.googleapis.com; connect-src 'self' https:;">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部一级导航和搜索栏 -->
+        <header class="main-header">
+            <!-- 一级导航：Bookmarks Bar / Other Bookmarks -->
+            <nav class="primary-navigation">
+                <button class="primary-nav-item active" data-primary="bookmarks_bar" id="bookmarksBarTab">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
+                    </svg>
+                    <span>Bookmarks Bar</span>
+                </button>
+                <button class="primary-nav-item" data-primary="other_bookmarks" id="otherBookmarksTab">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                    </svg>
+                    <span>Other Bookmarks</span>
+                </button>
+            </nav>
+
+            <!-- 中间搜索区域 -->
+            <div class="search-section">
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <button id="searchModeToggle" class="search-mode-toggle-btn" title="切换搜索模式">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="web-icon" style="display: none;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                        </button>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="搜索书签..."
+                            class="search-input"
+                            autocomplete="off"
+                            autofocus
+                        >
+                        <button id="clearSearch" class="clear-search hidden" title="清除搜索">×</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧功能按钮 -->
+            <div class="header-actions">
+                <button id="downloadBtn" class="action-btn-primary" title="下载">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                </button>
+                <button id="historyBtn" class="action-btn-primary" title="历史记录">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="1 4 1 10 7 7"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9"></path>
+                        <line x1="12" y1="2" x2="12" y2="22"></line>
+                    </svg>
+                </button>
+                <button id="bookmarksBtn" class="action-btn-primary" title="书签管理器">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        <polyline points="17 21 17 13 7 13"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                </button>
+                <button id="settingsBtn" class="action-btn-primary" title="设置">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- 下方主体部分 -->
+        <main class="main-layout">
+            <!-- 左侧二级导航区域 -->
+            <aside class="secondary-navigation">
+                <div class="nav-header">
+                    <h2 id="secondaryNavTitle">文件夹</h2>
+                    <span id="folderCount" class="folder-count">0</span>
+                </div>
+                <nav class="folder-navigation">
+                    <ul id="folderNavigation" class="folder-nav-list">
+                        <!-- 二级文件夹导航将通过JavaScript动态生成 -->
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- 右侧滚动列表区域 -->
+            <section class="bookmark-content">
+                <!-- 置顶区域 -->
+                <div id="pinnedSection" class="pinned-section" style="display: none;">
+                    <div class="bookmark-section">
+                        <div class="bookmark-section-header">
+                            <h2 class="bookmark-section-title">
+                                <svg class="bookmark-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                置顶
+                            </h2>
+                            <span class="bookmark-section-count" id="pinnedCount">0</span>
+                        </div>
+                        <div id="pinnedList" class="bookmark-list">
+                            <!-- 置顶书签将通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bookmarkSections" class="bookmark-sections">
+                    <!-- 分类书签将通过JavaScript动态生成 -->
+                </div>
+
+                <!-- 空状态提示 -->
+                <div id="emptyState" class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M19 11l-7-7-7 7m14 0l-7 7-7-7"/>
+                    </svg>
+                    <h3>暂无书签</h3>
+                    <p>该分类下没有书签</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 加载提示 -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>正在加载书签...</p>
+    </div>
+
+    <!-- 设置弹窗 -->
+    <div id="settingsModal" class="settings-modal">
+        <div class="settings-overlay"></div>
+        <div class="settings-dialog">
+            <div class="settings-header">
+                <h2>设置</h2>
+                <button id="closeSettingsBtn" class="close-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="settings-content">
+                <!-- 左侧导航 -->
+                <nav class="settings-nav">
+                    <ul class="settings-nav-list">
+                        <li class="settings-nav-item active" data-panel="search">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                            </svg>
+                            <span>搜索设置</span>
+                        </li>
+                        <li class="settings-nav-item" data-panel="about">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                            <span>关于</span>
+                        </li>
+                    </ul>
+                </nav>
+
+                <!-- 右侧功能区 -->
+                <div class="settings-panels">
+                    <!-- 搜索设置面板 -->
+                    <div class="settings-panel active" id="searchPanel">
+                        <div class="panel-content">
+                            <h3>搜索引擎选择</h3>
+                            <p class="panel-description">选择您偏好的搜索引擎</p>
+
+                            <div class="setting-group">
+                                <label class="setting-option">
+                                    <input type="radio" name="searchEngine" value="google" checked>
+                                    <span class="radio-indicator"></span>
+                                    <div class="option-info">
+                                        <div class="option-title">Google</div>
+                                        <div class="option-description">全球最大的搜索引擎</div>
+                                    </div>
+                                </label>
+
+                                <label class="setting-option">
+                                    <input type="radio" name="searchEngine" value="bing">
+                                    <span class="radio-indicator"></span>
+                                    <div class="option-info">
+                                        <div class="option-title">Bing</div>
+                                        <div class="option-description">微软公司的搜索引擎</div>
+                                    </div>
+                                </label>
+
+                                <label class="setting-option">
+                                    <input type="radio" name="searchEngine" value="baidu">
+                                    <span class="radio-indicator"></span>
+                                    <div class="option-info">
+                                        <div class="option-title">百度</div>
+                                        <div class="option-description">中文搜索引擎</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 关于面板 -->
+                    <div class="settings-panel" id="aboutPanel">
+                        <div class="panel-content">
+                            <div class="about-section">
+                                <div class="app-logo">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                    </svg>
+                                </div>
+                                <h3>MarkLauncher</h3>
+                                <p class="app-version">版本 1.0.0</p>
+                                <p class="app-description">一个简洁高效的Chrome书签启动器扩展</p>
+
+                                <div class="app-features">
+                                    <h4>主要功能</h4>
+                                    <ul>
+                                        <li>Chrome原生书签结构展示</li>
+                                        <li>智能搜索与多引擎支持</li>
+                                        <li>简洁现代的界面设计</li>
+                                        <li>快捷键操作支持</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右键菜单 -->
+    <div id="contextMenu" class="context-menu" style="display: none;">
+        <div class="context-menu-item" data-action="pin">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <span>置顶</span>
+        </div>
+        <div class="context-menu-item" data-action="unpin">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <span>取消置顶</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" data-action="qrcode">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/>
+            </svg>
+            <span>二维码分享</span>
+        </div>
+    </div>
+
+    <!-- 二维码分享弹窗 -->
+    <div id="qrcodeModal" class="qrcode-modal" style="display: none;">
+        <div class="qrcode-overlay"></div>
+        <div class="qrcode-dialog">
+            <div class="qrcode-header">
+                <h2 class="qrcode-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/>
+                    </svg>
+                    二维码分享
+                </h2>
+                <button id="closeQrcodeBtn" class="close-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="qrcode-content">
+                <div class="qrcode-info">
+                    <div class="qrcode-site-info">
+                        <div class="qrcode-favicon" id="qrcodeFavicon">
+                            <img src="" alt="" style="width: 32px; height: 32px; border-radius: 6px;">
+                        </div>
+                        <div class="qrcode-site-details">
+                            <h3 id="qrcodeTitle" class="qrcode-site-title">网站标题</h3>
+                            <p id="qrcodeUrl" class="qrcode-site-url">https://example.com</p>
+                        </div>
+                    </div>
+                    <div class="qrcode-instructions">
+                        <p>📱 使用手机扫描上方二维码快速访问此网站</p>
+                    </div>
+                </div>
+                <div class="qrcode-container">
+                    <div id="qrcodeCanvas" class="qrcode-canvas">
+                        <!-- 二维码将在这里生成 -->
+                    </div>
+                    <div class="qrcode-actions">
+                        <button id="copyLinkBtn" class="action-btn-secondary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                            </svg>
+                            复制链接
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QRCode 生成库 - 本地文件 -->
+    <script src="qrcode.min.js"></script>
+    <script src="newtab.js"></script>
+</body>
+</html>
