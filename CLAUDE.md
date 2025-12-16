@@ -7,10 +7,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **MarkLauncher** 是一个 Chrome 浏览器新标签页扩展，替代默认新标签页，提供书签管理和快速访问功能。
 
 **核心特性：**
-- 左侧文件夹导航（Chrome 书签栏/其他书签）
-- 双模式搜索（书签搜索 + 网络搜索）
-- 响应式 Material Design 界面
+- 左侧文件夹导航（Chrome 书签栏/其他书签），支持折叠/展开
+- 双模式搜索（书签搜索 + 网络搜索），Tab键切换模式
+- 响应式 Material Design 界面，支持深色主题
 - 键盘快捷键支持（Ctrl+K 聚焦搜索）
+- 二维码生成功能
+- 国际化支持（中英文）
+- 完整的设置系统（搜索引擎选择、主题切换）
 
 ## 技术架构
 
@@ -24,18 +27,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 代码结构
 ```
 核心文件：
-├── manifest.json          # Chrome 扩展配置文件
+├── manifest.json          # Chrome Extension V3 配置文件
 ├── newtab.html           # 主页面（三栏布局）
-├── newtab.js             # MarkLauncher 主类（36.6KB）
-├── styles.css            # 样式文件（19.9KB）
-└── background.js         # 后台服务工作者
+├── newtab.js             # MarkLauncher 主类（74KB）
+├── styles.css            # 样式文件（38KB）
+├── background.js         # 后台服务工作者
+├── qrcode.min.js         # 二维码生成库（21KB）
+└── _locales/             # 国际化文件
+    ├── en/messages.json  # 英文翻译
+    └── zh_CN/messages.json  # 中文翻译
 ```
 
 ### 架构模式
 - **单类设计**: `MarkLauncher` 类封装所有核心功能
-- **模块化方法**: 按功能分离的方法组织（搜索、书签、设置、UI）
+- **模块化方法**: 按功能分离的方法组织（搜索、书签、设置、UI、二维码、国际化）
 - **双层数据结构**: `bookmarksBarData` 和 `otherBookmarksData`
 - **事件驱动**: DOM 事件和 Chrome API 事件处理
+- **国际化系统**: 基于Chrome Extension i18n API
+- **主题系统**: CSS变量 + 深色/明亮主题切换
 
 ## 开发工作流
 
@@ -47,13 +56,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 3. 使用浏览器开发者工具调试
 ```
 
-### 本地测试
-- 使用提供的测试页面进行功能验证：
-  - `layout-test.html` - 布局测试
-  - `settings-test.html` - 设置功能测试
-  - `search-buttons-test.html` - 搜索按钮测试
-  - `placeholder-test.html` - 占位符功能测试
-  - `test.html` - 综合功能测试
 
 ### 扩展安装（开发模式）
 1. 打开 `chrome://extensions/`
@@ -92,17 +94,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 书签数据管理
 - **Chrome API**: `chrome.bookmarks.getTree()`
 - **数据结构**: 分离文件夹和书签
-- **状态管理**: `currentPrimaryTab`, `currentFolderId`
+- **状态管理**: `currentPrimaryTab`, `currentFolderId`, `sidebarOpen`
 
 ### 搜索功能
 - **双模式**: 书签搜索 + 网络搜索
 - **搜索引擎**: 支持 Google/Bing/百度（可配置）
 - **快捷键**: Ctrl+K 聚焦，Tab 切换模式
+- **实时过滤**: 支持标题、URL、文件夹搜索
+
+### 侧边栏功能
+- **折叠/展开**: 支持左侧导航栏状态切换
+- **状态持久化**: localStorage 存储侧边栏状态
+- **平滑动画**: CSS transition 效果
+
+### 二维码功能
+- **右键菜单**: 上下文菜单生成二维码
+- **本地生成**: qrcode-generator 库
+- **备用方案**: HTML Canvas 生成
+- **下载功能**: 支持二维码图片下载
+
+### 主题系统
+- **CSS变量**: `:root` 和 `[data-theme="dark"]` 定义
+- **主题切换**: JavaScript 动态切换主题
+- **主题持久化**: Chrome Storage 保存主题设置
+
+### 国际化系统
+- **Chrome i18n API**: `chrome.i18n.getMessage()`
+- **动态语言**: 支持中英文切换
+- **翻译文件**: `_locales/` 目录下的 JSON 文件
 
 ### 设置存储
 - **Chrome Storage**: `chrome.storage.sync`
 - **数据同步**: 跨设备设置同步
-- **配置项**: 搜索引擎选择
+- **配置项**: 搜索引擎选择、主题设置、语言设置
 
 ## 关键文件说明
 
@@ -119,11 +143,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - `searchBookmarks()` - 搜索功能
   - `performWebSearch()` - 网络搜索
   - `loadSettings()` / `saveSettings()` - 设置管理
+  - `toggleSidebar()` - 侧边栏切换
+  - `showQRCodeModal()` / `generateQRCode()` - 二维码功能
+  - `applyTheme()` / `toggleTheme()` - 主题功能
+  - `initializeI18n()` - 国际化初始化
 
 ### styles.css
 - **响应式设计**: CSS Grid + Flexbox
-- **主题系统**: CSS 变量
+- **主题系统**: CSS 变量 + 深色主题
 - **动画**: 平滑过渡效果
+- **组件化**: 按功能模块组织样式
+- **响应式断点**: 桌面/平板/移动端适配
+
+### _locales/
+- **国际化文件**: JSON 格式的翻译文件
+- **支持语言**: 中文（zh_CN）、英文（en）
+- **消息键**: 功能文本的翻译映射
 
 ## 常见开发任务
 
@@ -151,7 +186,4 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目文件说明
 - `README.md`: 基本项目介绍和使用说明
-- `INSTALL.md`: 详细安装指南
-- `SETTINGS.md`: 设置功能技术文档
-- `FEATURES.md`: 功能详细说明
-- 各种 `-test.html` 文件: 功能测试页面
+- `CLAUDE.md`: Claude Code 开发指导文档

@@ -1,15 +1,17 @@
 # MarkLauncher - 书签启动器
 
-一个简洁高效的Chrome新标签页扩展，帮助您快速访问和管理书签。
+一个简洁高效的Chrome新标签页扩展，替代默认新标签页，提供书签管理和快速访问功能。
 
 ## 功能特点
 
-- 🗂️ **左侧文件夹导航** - 一级文件夹分类显示，快速切换
-- 🔍 **实时搜索** - 支持按标题、URL和文件夹搜索书签
-- 📱 **响应式设计** - 适配不同屏幕尺寸
+- 🗂️ **文件夹导航** - 左侧Chrome书签栏/其他书签分类导航，支持折叠/展开
+- 🔍 **双模式搜索** - 书签搜索 + 网络搜索，支持搜索引擎切换
+- 📱 **响应式设计** - 适配不同屏幕尺寸的Material Design界面
 - ⚡ **快速启动** - 点击书签直接打开，Ctrl+点击新标签页打开
-- 🎨 **现代化界面** - 简洁美观的Material Design风格
-- ⌨️ **键盘快捷键** - Ctrl+K 快速聚焦搜索框
+- 🎨 **深色主题** - 支持明暗主题切换
+- ⌨️ **键盘快捷键** - Ctrl+K 快速聚焦搜索框，Tab切换搜索模式
+- 📊 **二维码生成** - 支持为书签生成二维码
+- 🌍 **国际化** - 支持中英文界面
 
 ## 安装方法
 
@@ -26,30 +28,19 @@
 
 ```
 marklauncher/
-├── manifest.json          # 扩展配置文件
-├── newtab.html           # 新标签页HTML结构
-├── newtab.js             # 主要JavaScript逻辑
-├── styles.css            # 样式文件
+├── manifest.json          # Chrome Extension V3 配置文件
+├── newtab.html           # 主页面（三栏布局结构）
+├── newtab.js             # MarkLauncher 主类（核心功能实现）
+├── styles.css            # 样式文件（响应式设计 + CSS变量）
 ├── background.js         # 后台服务工作者
+├── qrcode.min.js         # 二维码生成库
 ├── icons/                # 图标文件
-│   ├── icon16.png
-│   ├── icon48.png
-│   └── icon128.png
-├── docs/                 # 文档文件夹
-│   ├── FEATURES.md       # 功能特点说明
-│   ├── INSTALL.md        # 安装指南
-│   ├── PLACEHOLDER_FIX.md # 占位符修复说明
-│   ├── SEARCH_BUTTONS_UPDATE.md # 搜索按钮更新说明
-│   └── SETTINGS.md       # 设置功能说明
-├── tests/                # 测试文件夹
-│   ├── qrcode-test.html  # 二维码功能测试
-│   ├── pinned-test.html  # 置顶功能测试
-│   ├── search-buttons-test.html  # 搜索按钮测试
-│   ├── settings-test.html  # 设置功能测试
-│   ├── layout-test.html  # 布局测试
-│   ├── placeholder-test.html  # 占位符测试
-│   ├── qrcode-simple-test.html  # 简单二维码测试
-│   └── test.html         # 通用测试文件
+│   └── icon.svg          # 扩展图标
+├── _locales/             # 国际化文件
+│   ├── en/               # 英文翻译
+│   │   └── messages.json
+│   └── zh_CN/            # 中文翻译
+│       └── messages.json
 ├── CLAUDE.md             # Claude Code 指导文档
 └── README.md             # 项目说明文档
 ```
@@ -80,16 +71,19 @@ marklauncher/
 
 ### 基本操作
 
-1. **文件夹切换** - 点击左侧文件夹查看对应书签
+1. **文件夹导航** - 点击左侧书签栏/其他书签切换分类，点击箭头折叠/展开侧边栏
 2. **书签打开** - 点击书签卡片在当前标签页打开
 3. **新标签页打开** - Ctrl+点击书签在新标签页打开
-4. **搜索书签** - 在顶部搜索框输入关键词
-5. **清除搜索** - 点击搜索框右侧的×按钮
+4. **双模式搜索** - 在顶部搜索框输入关键词进行书签搜索，Tab键切换到网络搜索
+5. **二维码生成** - 右键点击书签选择生成二维码
+6. **主题切换** - 在设置中切换明暗主题
+7. **搜索引擎设置** - 支持Google、Bing、百度搜索引擎切换
 
 ### 键盘快捷键
 
 - `Ctrl + K` - 聚焦到搜索框
 - `Escape` - 清除搜索或退出搜索框焦点
+- `Tab` - 在书签搜索和网络搜索模式间切换
 
 ## 权限说明
 
@@ -99,25 +93,28 @@ marklauncher/
 - `storage` - 本地数据存储
 - `tabs` - 创建和管理标签页
 
-## 技术特点
+## 技术架构
 
-- 使用现代JavaScript (ES6+) 开发
-- 采用CSS Grid和Flexbox布局
-- 遵循Material Design设计规范
-- 支持Chrome Extension Manifest V3
+- **平台**: Chrome Extension Manifest V3
+- **语言**: 原生JavaScript (ES6+)，单类设计模式
+- **样式**: CSS3 (Grid + Flexbox) + CSS变量主题系统
+- **架构**: 单页面应用，事件驱动模型
+- **国际化**: Chrome Extension i18n API
+- **数据存储**: Chrome Storage API (跨设备同步)
 
 ## 浏览器兼容性
 
-- Chrome 88+
-- Edge 88+ (基于Chromium)
+- Chrome 88+ ✅
+- Edge 88+ (Chromium) ✅
+- 不支持 Firefox/Safari（不同扩展API）
 
-## 开发计划
+## 开发特点
 
-- [ ] 深色模式支持
-- [ ] 书签编辑功能
-- [ ] 自定义主题颜色
-- [ ] 书签导入/导出
-- [ ] 使用统计显示
+- **无构建工具**: 直接修改源码，无需编译步骤
+- **原生开发**: 使用浏览器开发者工具调试
+- **模块化设计**: 按功能分离的方法组织
+- **权限最小化**: 仅申请必要的Chrome API权限
+
 
 ## 贡献
 
