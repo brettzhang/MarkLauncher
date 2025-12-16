@@ -222,5 +222,49 @@
   "unnamed_folder": {
     "message": "Unnamed Folder",
     "description": "Default name for unnamed bookmark folders"
+  },
+  "theme_light": {
+    "message": "Light",
+    "description": "Light theme option"
+  },
+  "theme_light_desc": {
+    "message": "Bright and clean interface",
+    "description": "Light theme description"
+  },
+  "theme_dark": {
+    "message": "Dark",
+    "description": "Dark theme option"
+  },
+  "theme_dark_desc": {
+    "message": "Eye-friendly dark experience",
+    "description": "Dark theme description"
+  },
+  "theme_system": {
+    "message": "System",
+    "description": "System theme option"
+  },
+  "theme_system_desc": {
+    "message": "Follow your OS preference automatically",
+    "description": "System theme description"
+  },
+  "theme_button_title": {
+    "message": "Theme settings",
+    "description": "Tooltip for theme toggle button"
+  },
+  "toggle_navigation": {
+    "message": "Toggle navigation",
+    "description": "Tooltip for mobile navigation toggle"
+  },
+  "open_actions_menu": {
+    "message": "Open actions menu",
+    "description": "Tooltip for mobile actions dropdown"
+  },
+  "appearance": {
+    "message": "Appearance",
+    "description": "Appearance settings label"
+  },
+  "appearance_desc": {
+    "message": "Choose the visual style you prefer",
+    "description": "Appearance panel description"
   }
 }

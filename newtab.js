@@ -35,6 +35,7 @@ class MarkLauncher {
         // 设置相关
         this.settings = {
             searchEngine: 'google', // 'google', 'bing', 'baidu'
+            theme: 'system'
         };
 
         // 置顶功能相关
@@ -47,6 +48,8 @@ class MarkLauncher {
             bing: 'https://www.bing.com/search?q=',
             baidu: 'https://www.baidu.com/s?wd='
         };
+
+        this.themeMediaQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
         // 检查Chrome API是否可用
         if (!this.checkChromeAPI()) {
@@ -93,6 +96,7 @@ class MarkLauncher {
 
             this.showLoading(true);
             await this.loadSettings(); // 加载设置
+            this.initTheme();
             await this.loadPinnedBookmarks(); // 加载置顶书签
             await this.loadBookmarks();
             this.bindEvents();
@@ -347,6 +351,10 @@ class MarkLauncher {
 
         // 右键菜单事件
         this.bindContextMenuEvents();
+        this.bindMobileSearchToggle();
+        this.bindMobileActionsMenu();
+        this.bindMobileNavigationToggle();
+        this.bindResponsiveHandlers();
     }
 
     /**
@@ -387,6 +395,173 @@ class MarkLauncher {
                 this.hideContextMenu();
             }
         });
+    }
+
+    /**
+     * 移动端搜索栏展开按钮
+     */
+    bindMobileSearchToggle() {
+        const toggleBtn = document.getElementById('mobileSearchToggle');
+        const searchSection = document.querySelector('.search-section');
+        const searchInput = document.getElementById('searchInput');
+        if (!toggleBtn || !searchSection || !searchInput) return;
+
+        const openSearch = () => {
+            if (window.innerWidth > 768) return;
+            searchSection.classList.add('mobile-search-active');
+            requestAnimationFrame(() => searchInput.focus());
+        };
+
+        const closeSearch = () => {
+            if (window.innerWidth > 768) return;
+            this.closeMobileSearch();
+        };
+
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchSection.classList.contains('mobile-search-active')) {
+                closeSearch();
+            } else {
+                openSearch();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth > 768) return;
+            if (!searchSection.contains(e.target)) {
+                closeSearch();
+            }
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (window.innerWidth > 768) return;
+            if (e.key === 'Escape') {
+                e.stopPropagation();
+                this.closeMobileSearch();
+                searchInput.blur();
+            }
+        });
+    }
+
+    /**
+     * 绑定移动端操作菜单
+     */
+    bindMobileActionsMenu() {
+        const toggleBtn = document.getElementById('mobileActionsToggle');
+        const actions = document.getElementById('headerActions');
+        if (!toggleBtn || !actions) return;
+
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            actions.classList.toggle('open');
+            toggleBtn.classList.toggle('active', actions.classList.contains('open'));
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!actions.contains(e.target) && !toggleBtn.contains(e.target)) {
+                this.closeMobileActionsMenu();
+            }
+        });
+    }
+
+    /**
+     * 绑定移动端导航折叠
+     */
+    bindMobileNavigationToggle() {
+        const toggleBtn = document.getElementById('mobileNavToggle');
+        const sidebar = document.querySelector('.secondary-navigation');
+        const backdrop = document.getElementById('navBackdrop');
+        if (!toggleBtn || !sidebar) return;
+
+        const toggleNav = (e) => {
+            if (window.innerWidth > 768) return;
+            if (e) {
+                e.stopPropagation();
+            }
+            const isOpen = sidebar.classList.toggle('open');
+            toggleBtn.classList.toggle('active', isOpen);
+            if (backdrop) {
+                backdrop.classList.toggle('show', isOpen);
+            }
+        };
+
+        toggleBtn.addEventListener('click', toggleNav);
+        backdrop?.addEventListener('click', () => this.closeMobileNavigationPanel());
+
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth > 768) return;
+            if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                this.closeMobileNavigationPanel();
+            }
+        });
+    }
+
+    /**
+     * 绑定窗口尺寸变化
+     */
+    bindResponsiveHandlers() {
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                this.closeMobileNavigationPanel();
+                this.closeMobileActionsMenu();
+                this.closeMobileSearch();
+            }
+        });
+    }
+
+    /**
+     * 关闭移动端导航抽屉
+     */
+    closeMobileNavigationPanel() {
+        const sidebar = document.querySelector('.secondary-navigation');
+        const toggleBtn = document.getElementById('mobileNavToggle');
+        const backdrop = document.getElementById('navBackdrop');
+        sidebar?.classList.remove('open');
+        toggleBtn?.classList.remove('active');
+        backdrop?.classList.remove('show');
+    }
+
+    /**
+     * 关闭移动端操作菜单
+     */
+    closeMobileActionsMenu() {
+        const actions = document.getElementById('headerActions');
+        const toggleBtn = document.getElementById('mobileActionsToggle');
+        actions?.classList.remove('open');
+        toggleBtn?.classList.remove('active');
+    }
+
+    /**
+     * 关闭移动端搜索框
+     */
+    closeMobileSearch() {
+        const searchSection = document.querySelector('.search-section');
+        if (searchSection) {
+            searchSection.classList.remove('mobile-search-active');
+        }
+    }
+
+    /**
+     * 更新移动端面包屑
+     */
+    updateMobileBreadcrumb() {
+        const label = document.getElementById('mobileNavLabel');
+        if (!label) return;
+
+        const primaryLabel = this.currentPrimaryTab === 'bookmarks_bar'
+            ? t('bookmarks_bar')
+            : t('other_bookmarks');
+
+        let detailLabel = t('all_bookmarks');
+        const data = this.getCurrentData();
+        if (this.currentFolderId && this.currentFolderId !== 'root' && data?.folders) {
+            const folder = data.folders.find(f => f.id === this.currentFolderId);
+            if (folder) {
+                detailLabel = folder.title;
+            }
+        }
+
+        label.textContent = `${primaryLabel} › ${detailLabel}`;
     }
 
     /**
@@ -532,6 +707,8 @@ class MarkLauncher {
 
         // 滚动到对应的分组
         this.scrollToSection(folderId);
+        this.updateMobileBreadcrumb();
+        this.closeMobileNavigationPanel();
     }
 
     /**
@@ -597,6 +774,7 @@ class MarkLauncher {
 
         // 更新文件夹数量
         document.getElementById('folderCount').textContent = data.folders.length;
+        this.updateMobileBreadcrumb();
     }
 
     /**
@@ -915,13 +1093,17 @@ class MarkLauncher {
     /**
      * 保存设置
      */
-    async saveSettings() {
+    async saveSettings(options = {}) {
+        const silent = typeof options === 'boolean' ? options : !!options.silent;
+
         return new Promise((resolve) => {
             chrome.storage.sync.set({ marklauncher_settings: this.settings }, () => {
                 if (chrome.runtime.lastError) {
                     console.error('保存设置失败:', chrome.runtime.lastError);
                 } else {
-                    this.showToast(t('settings_saved'));
+                    if (!silent) {
+                        this.showToast(t('settings_saved'));
+                    }
                 }
                 resolve();
             });
@@ -941,8 +1123,14 @@ class MarkLauncher {
             searchEngineRadio.checked = true;
         }
 
+        const themeRadio = document.querySelector(`input[name="themePreference"][value="${this.settings.theme}"]`);
+        if (themeRadio) {
+            themeRadio.checked = true;
+        }
+
         // 更新设置面板中的国际化文本
         this.updateI18nElements();
+        this.highlightActiveThemeOption(this.settings.theme);
 
         this.bindSettingsEvents();
     }
@@ -987,6 +1175,17 @@ class MarkLauncher {
                 }
             };
         });
+
+        // 主题选择
+        const themeRadios = document.querySelectorAll('input[name="themePreference"]');
+        themeRadios.forEach(radio => {
+            radio.onchange = (e) => {
+                if (e.target.checked) {
+                    this.applyTheme(e.target.value);
+                    this.saveSettings();
+                }
+            };
+        });
     }
 
     /**
@@ -1006,6 +1205,8 @@ class MarkLauncher {
 
         if (panelName === 'search') {
             document.getElementById('searchPanel').classList.add('active');
+        } else if (panelName === 'appearance') {
+            document.getElementById('appearancePanel').classList.add('active');
         } else if (panelName === 'about') {
             document.getElementById('aboutPanel').classList.add('active');
         }
@@ -1659,6 +1860,59 @@ class MarkLauncher {
         return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZDEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZjhmOWZhO3N0b3Atb3BhY2l0eToxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNlOWVjZWY7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHJ4PSIzIiBmaWxsPSJ1cmwoI2dyYWQxKSIgc3Ryb2tlPSIjZGVlMmU2IiBzdHJva2Utd2lkdGg9IjAuNSIvPgogIDxyZWN0IHg9IjIiIHk9IjMiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxIiByeD0iMC41IiBmaWxsPSIjODY4ZTk2Ii8+CiAgPHJlY3QgeD0iMiIgeT0iNiIgd2lkdGg9IjEyIiBoZWlnaHQ9IjEiIHJ4PSIwLjUiIGZpbGw9IiM4NjhlOTYiLz4KICA8cmVjdCB4PSIyIiB5PSI5IiB3aWR0aD0iMTIiIGhlaWdodD0iMSIgcng9IjAuNSIgZmlsbD0iIzg2OGU5NiIvPgogIDxyZWN0IHg9IjIiIHk9IjEyIiB3aWR0aD0iOCIgaGVpZ2h0PSIxIiByeD0iMC41IiBmaWxsPSIjODY4ZTk2Ii8+Cjwvc3ZnPg==';
     }
 
+    // ========== 主题与显示设置 ==========
+
+    initTheme() {
+        this.applyTheme(this.settings.theme || 'system');
+
+        if (this.themeMediaQuery) {
+            const handler = (event) => {
+                if (this.settings.theme === 'system') {
+                    this.applyTheme('system');
+                }
+            };
+
+            if (this.themeMediaQuery.addEventListener) {
+                this.themeMediaQuery.addEventListener('change', handler);
+            } else if (this.themeMediaQuery.addListener) {
+                this.themeMediaQuery.addListener(handler);
+            }
+
+            this.themeMediaChangeHandler = handler;
+        }
+    }
+
+    getResolvedTheme(preference) {
+        if (preference === 'system') {
+            return this.themeMediaQuery && this.themeMediaQuery.matches ? 'dark' : 'light';
+        }
+        return preference;
+    }
+
+    applyTheme(preference = 'system') {
+        this.settings.theme = preference;
+        const resolvedTheme = this.getResolvedTheme(preference);
+        document.documentElement.setAttribute('data-theme', resolvedTheme);
+        document.documentElement.setAttribute('data-theme-preference', preference);
+        this.updateThemeButton(preference, resolvedTheme);
+        this.highlightActiveThemeOption(preference);
+    }
+
+    updateThemeButton(preference, resolvedTheme) {
+        const toggleBtn = document.getElementById('themeToggleBtn');
+        if (!toggleBtn) return;
+        toggleBtn.dataset.themePreference = preference;
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleBtn.classList.toggle('dark-active', resolvedTheme === 'dark');
+    }
+
+    highlightActiveThemeOption(preference) {
+        const themeRadios = document.querySelectorAll('input[name="themePreference"]');
+        themeRadios.forEach(radio => {
+            radio.checked = radio.value === preference;
+        });
+    }
+
     // ========== 国际化支持 ==========
 
     /**
@@ -1719,7 +1973,15 @@ class MarkLauncher {
                 'search_on_bing': '在 Bing 中搜索...',
                 'search_on_baidu': '在百度中搜索...',
                 'no_bookmarks': '暂无书签',
-                'unnamed_folder': '未命名文件夹'
+                'unnamed_folder': '未命名文件夹',
+                'appearance': '外观',
+                'appearance_desc': '选择偏好的配色模式',
+                'theme_light': '浅色',
+                'theme_dark': '深色',
+                'theme_system': '跟随系统',
+                'theme_light_desc': '明亮清爽的界面风格',
+                'theme_dark_desc': '夜间友好的暗色主题',
+                'theme_system_desc': '根据系统外观自动切换'
             },
             'en': {
                 'bookmarks_bar': 'Bookmarks Bar',
@@ -1731,7 +1993,15 @@ class MarkLauncher {
                 'search_on_bing': 'Search on Bing...',
                 'search_on_baidu': 'Search on Baidu...',
                 'no_bookmarks': 'No Bookmarks',
-                'unnamed_folder': 'Unnamed Folder'
+                'unnamed_folder': 'Unnamed Folder',
+                'appearance': 'Appearance',
+                'appearance_desc': 'Choose the visual style you prefer',
+                'theme_light': 'Light',
+                'theme_dark': 'Dark',
+                'theme_system': 'System',
+                'theme_light_desc': 'Bright and clean interface',
+                'theme_dark_desc': 'Eye-friendly dark experience',
+                'theme_system_desc': 'Follow OS preference automatically'
             }
         };
 
@@ -1835,6 +2105,8 @@ class MarkLauncher {
             const span = otherBookmarksTab.querySelector('span');
             if (span) span.textContent = t('other_bookmarks');
         }
+
+        this.updateMobileBreadcrumb();
     }
 
     /**

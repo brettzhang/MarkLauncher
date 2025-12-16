@@ -222,5 +222,49 @@
   "unnamed_folder": {
     "message": "未命名文件夹",
     "description": "Default name for unnamed bookmark folders"
+  },
+  "theme_light": {
+    "message": "浅色",
+    "description": "Light theme option"
+  },
+  "theme_light_desc": {
+    "message": "明亮清爽的界面风格",
+    "description": "Light theme description"
+  },
+  "theme_dark": {
+    "message": "深色",
+    "description": "Dark theme option"
+  },
+  "theme_dark_desc": {
+    "message": "夜间友好的暗色体验",
+    "description": "Dark theme description"
+  },
+  "theme_system": {
+    "message": "跟随系统",
+    "description": "System theme option"
+  },
+  "theme_system_desc": {
+    "message": "根据系统外观自动切换",
+    "description": "System theme description"
+  },
+  "theme_button_title": {
+    "message": "主题设置",
+    "description": "Tooltip for theme toggle button"
+  },
+  "toggle_navigation": {
+    "message": "切换导航",
+    "description": "Tooltip for mobile navigation toggle"
+  },
+  "open_actions_menu": {
+    "message": "打开操作菜单",
+    "description": "Tooltip for mobile actions dropdown"
+  },
+  "appearance": {
+    "message": "外观",
+    "description": "Appearance settings label"
+  },
+  "appearance_desc": {
+    "message": "选择偏好的配色模式",
+    "description": "Appearance panel description"
   }
 }
