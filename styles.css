@@ -196,8 +196,6 @@ body::before {
 
 .search-container:focus-within {
     background: rgba(255, 255, 255, 0.95);
-    box-shadow: var(--shadow-lg), var(--shadow-glow);
-    transform: translateY(-2px);
 }
 
 /* 搜索输入框 */
@@ -333,8 +331,8 @@ body::before {
 .action-btn-primary:hover {
     color: white;
     border-color: transparent;
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .action-btn-primary:hover::before {
@@ -352,7 +350,7 @@ body::before {
 }
 
 .action-btn-primary:hover svg {
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 /* 下方主体布局 */
@@ -511,21 +509,18 @@ body::before {
 }
 
 .bookmark-sections {
-    padding: 24px 32px;
+    padding: 16px 24px;
 }
 
 /* 书签分组 */
 .bookmark-section {
-    margin-bottom: 32px;
+    margin-bottom: 20px;
     opacity: 0;
-    animation: fadeInUp 0.3s ease forwards;
+    animation: fadeInUp 0.15s ease forwards;
 }
 
-.bookmark-section:nth-child(1) { animation-delay: 0.1s; }
-.bookmark-section:nth-child(2) { animation-delay: 0.2s; }
-.bookmark-section:nth-child(3) { animation-delay: 0.3s; }
-.bookmark-section:nth-child(4) { animation-delay: 0.4s; }
-.bookmark-section:nth-child(5) { animation-delay: 0.5s; }
+.bookmark-section:nth-child(1) { animation-delay: 0.05s; }
+.bookmark-section:nth-child(2) { animation-delay: 0.08s; }
 
 @keyframes fadeInUp {
     from {
@@ -542,8 +537,8 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
     border-bottom: 2px solid var(--border-color);
 }
 
@@ -572,7 +567,7 @@ body::before {
 .bookmark-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 16px;
+    gap: 12px;
 }
 
 /* 书签卡片 */
@@ -581,14 +576,14 @@ body::before {
     backdrop-filter: blur(10px);
     border: 1px solid var(--border-light);
     border-radius: var(--border-radius-lg);
-    padding: 20px;
+    padding: 14px;
     transition: var(--transition-normal);
     cursor: pointer;
     position: relative;
     overflow: hidden;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
 }
 
 .bookmark-item::before {
@@ -605,8 +600,8 @@ body::before {
 }
 
 .bookmark-item:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
     border-color: transparent;
 }
 
@@ -615,8 +610,8 @@ body::before {
 }
 
 .bookmark-favicon {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: var(--border-radius);
     background: linear-gradient(135deg, var(--surface-tertiary) 0%, var(--surface-color) 100%);
     display: flex;
@@ -628,13 +623,13 @@ body::before {
 }
 
 .bookmark-item:hover .bookmark-favicon {
-    transform: scale(1.1) rotate(5deg);
+    transform: scale(1.05);
     box-shadow: var(--shadow-md);
 }
 
 .bookmark-favicon img {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: var(--border-radius-sm);
     transition: var(--transition-fast);
 }
@@ -1191,22 +1186,22 @@ body::before {
 
 /* 置顶功能样式 */
 .pinned-section {
-    padding: 24px 32px;
+    padding: 16px 24px;
     margin-bottom: 0;
 }
 
 .pinned-section .bookmark-section {
-    margin-bottom: 32px;
+    margin-bottom: 20px;
     opacity: 0;
-    animation: fadeInUp 0.3s ease forwards;
+    animation: fadeInUp 0.15s ease forwards;
 }
 
 .pinned-section .bookmark-section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
     border-bottom: 2px solid var(--border-color);
 }
 
@@ -1234,7 +1229,7 @@ body::before {
 .pinned-section .bookmark-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 16px;
+    gap: 12px;
 }
 
 /* 右键菜单样式 */
@@ -1283,6 +1278,7 @@ body::before {
 .pinned-section .bookmark-item {
     border-left: 3px solid var(--primary-color);
     background: rgba(74, 144, 226, 0.05);
+    animation: none; /* 禁用书签项的入场动画，避免与分组动画重复 */
 }
 
 .pinned-section .bookmark-item:hover {
@@ -1597,34 +1593,11 @@ body::before {
     }
 }
 
-/* 页面元素入场动画 */
-.bookmark-item {
-    animation: fadeInUp 0.6s ease-out forwards;
-}
+/* 书签项入场动画已移除 - 保持界面简洁 */
 
-.bookmark-item:nth-child(1) { animation-delay: 0.1s; }
-.bookmark-item:nth-child(2) { animation-delay: 0.15s; }
-.bookmark-item:nth-child(3) { animation-delay: 0.2s; }
-.bookmark-item:nth-child(4) { animation-delay: 0.25s; }
-.bookmark-item:nth-child(5) { animation-delay: 0.3s; }
-.bookmark-item:nth-child(6) { animation-delay: 0.35s; }
-.bookmark-item:nth-child(7) { animation-delay: 0.4s; }
-.bookmark-item:nth-child(8) { animation-delay: 0.45s; }
+/* 左侧导航动画已移除 - 保持简洁 */
 
-.folder-nav-item {
-    animation: slideInLeft 0.5s ease-out forwards;
-}
-
-.folder-nav-item:nth-child(1) { animation-delay: 0.1s; }
-.folder-nav-item:nth-child(2) { animation-delay: 0.15s; }
-.folder-nav-item:nth-child(3) { animation-delay: 0.2s; }
-.folder-nav-item:nth-child(4) { animation-delay: 0.25s; }
-.folder-nav-item:nth-child(5) { animation-delay: 0.3s; }
-
-/* 搜索框聚焦动画 */
-.search-input:focus {
-    animation: pulse 2s ease-in-out infinite;
-}
+/* 搜索框聚焦动画已移除 */
 
 /* 按钮点击涟漪效果 */
 .action-btn-primary::after {

@@ -1,14 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "MarkLauncher - 书签启动器",
-  "description": "一个简洁高效的新标签页书签启动器，左侧显示文件夹分类，右侧显示书签详情",
+  "name": "MarkLauncher - Bookmark Launcher",
+  "description": "A simple and efficient new tab bookmark launcher with folder navigation on the left and bookmark details on the right",
   "version": "1.0.0",
+  "default_locale": "en",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
   "permissions": [
     "bookmarks",
-    "storage"
+    "storage",
+    "favicon"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["_favicon/*"],
+      "matches": ["<all_urls>"]
+    }
   ],
   "icons": {
     "16": "icons/icon.svg",
@@ -19,6 +27,6 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "MarkLauncher设置"
+    "default_title": "MarkLauncher Settings"
   }
 }

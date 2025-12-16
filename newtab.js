@@ -1,6 +1,28 @@
 // 默认使用书签搜索模式
 const isGoogleSearch = false;
 
+// 全局国际化函数，支持占位符
+function t(key, substitutions) {
+    if (!key || !chrome?.i18n?.getMessage) {
+        return key;
+    }
+
+    try {
+        if (substitutions === undefined || substitutions === null) {
+            return chrome.i18n.getMessage(key) || key;
+        }
+
+        const normalizedSubs = Array.isArray(substitutions)
+            ? substitutions
+            : String(substitutions);
+
+        return chrome.i18n.getMessage(key, normalizedSubs) || key;
+    } catch (error) {
+        console.error('i18n 获取失败:', key, error);
+        return key;
+    }
+}
+
 class MarkLauncher {
     constructor() {
         this.bookmarksBarData = { folders: [], bookmarks: [] };
@@ -28,7 +50,10 @@ class MarkLauncher {
 
         // 检查Chrome API是否可用
         if (!this.checkChromeAPI()) {
-            this.showError('Chrome API不可用，请确保在Chrome浏览器中运行此扩展');
+            // 延迟错误显示，确保DOM已加载
+            setTimeout(() => {
+                this.showError(chrome.i18n.getMessage('chrome_api_error'));
+            }, 100);
             return;
         }
 
@@ -46,8 +71,23 @@ class MarkLauncher {
         }
     }
 
+    // 初始化国际化文本
+    initI18n() {
+        try {
+            this.updateI18nElements();
+            this.updateMainUIText();
+        } catch (error) {
+            console.error('初始化国际化失败:', error);
+        }
+    }
+
     async init() {
         try {
+            // 初始化国际化文本
+            this.initI18n();
+            // 更新按钮提示
+            this.updateButtonTitles();
+
             // 初始化时隐藏空状态
             document.getElementById('emptyState').classList.add('hidden');
 
@@ -65,7 +105,7 @@ class MarkLauncher {
             this.showLoading(false);
         } catch (error) {
             console.error('初始化失败:', error);
-            this.showError(`加载书签失败: ${error.message}`);
+            this.showError(chrome.i18n.getMessage('load_bookmarks_failed') + ': ' + error.message);
             this.showLoading(false);
         }
     }
@@ -143,7 +183,7 @@ class MarkLauncher {
                 // 文件夹
                 const folder = {
                     id: child.id,
-                    title: child.title || '未命名文件夹',
+                    title: child.title || chrome.i18n.getMessage('unnamed_folder'),
                     bookmarks: []
                 };
 
@@ -189,19 +229,16 @@ class MarkLauncher {
     }
 
     /**
-     * 获取网站favicon URL，使用智能回退策略
+     * 获取网站favicon URL，使用Chrome官方推荐的API
      */
     getFaviconUrl(url) {
         // Chrome默认书签图标的SVG (Base64编码)
         const chromeDefaultIcon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZDEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZjhmOWZhO3N0b3Atb3BhY2l0eToxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNlOWVjZWY7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHJ4PSIzIiBmaWxsPSJ1cmwoI2dyYWQxKSIgc3Ryb2tlPSIjZGVlMmU2IiBzdHJva2Utd2lkdGg9IjAuNSIvPgogIDxyZWN0IHg9IjIiIHk9IjMiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxIiByeD0iMC41IiBmaWxsPSIjODY4ZTk2Ii8+CiAgPHJlY3QgeD0iMiIgeT0iNiIgd2lkdGg9IjEyIiBoZWlnaHQ9IjEiIHJ4PSIwLjUiIGZpbGw9IiM4NjhlOTYiLz4KICA8cmVjdCB4PSIyIiB5PSI5IiB3aWR0aD0iMTIiIGhlaWdodD0iMSIgcng9IjAuNSIgZmlsbD0iIzg2OGU5NiIvPgogIDxyZWN0IHg9IjIiIHk9IjEyIiB3aWR0aD0iOCIgaGVpZ2h0PSIxIiByeD0iMC41IiBmaWxsPSIjODY4ZTk2Ii8+Cjwvc3ZnPg==';
 
         try {
-            const urlObj = new URL(url);
-            const domain = urlObj.hostname;
-            const origin = urlObj.origin;
-
-            // 优先使用Google Favicon API，成功率最高
-            return `https://www.google.com/s2/favicons?domain=${domain}&sz=32&default=${encodeURIComponent(chromeDefaultIcon)}`;
+            // 使用Chrome官方推荐的favicon API
+            const faviconUrl = `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(url)}&size=32`;
+            return faviconUrl;
         } catch (error) {
             // 如果URL解析失败，返回默认图标
             return chromeDefaultIcon;
@@ -377,7 +414,7 @@ class MarkLauncher {
 
         // 更新二级导航标题
         const navTitle = document.getElementById('secondaryNavTitle');
-        navTitle.textContent = tab === 'bookmarks_bar' ? 'Bookmarks Bar 文件夹' : 'Other Bookmarks 文件夹';
+        navTitle.textContent = tab === 'bookmarks_bar' ? chrome.i18n.getMessage('bookmarks_bar_folders') : chrome.i18n.getMessage('other_bookmarks_folders');
 
         // 重新渲染界面（保持搜索状态）
         this.renderNavigation();
@@ -536,7 +573,7 @@ class MarkLauncher {
                     <svg class="nav-folder-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                     </svg>
-                    <span class="nav-folder-name">全部书签</span>
+                    <span class="nav-folder-name">${t('all_bookmarks')}</span>
                     <span class="nav-bookmark-count">${data.bookmarks.length}</span>
                 </div>
             </li>
@@ -591,7 +628,7 @@ class MarkLauncher {
             if (hasContent) {
                 sections = [{
                     id: 'search_results',
-                    title: '搜索结果',
+                    title: t('search_results_title'),
                     bookmarks: filteredBookmarks
                 }];
             }
@@ -601,7 +638,7 @@ class MarkLauncher {
             if (data.bookmarks.length > 0) {
                 sections.push({
                     id: 'root',
-                    title: '书签栏',
+                    title: t('bookmarks_bar_title'),
                     bookmarks: data.bookmarks
                 });
                 hasContent = true;
@@ -688,7 +725,6 @@ class MarkLauncher {
             <div class="bookmark-item" data-url="${bookmark.url}" data-id="${bookmark.id}">
                 <div class="bookmark-favicon">
                     <img src="${bookmark.favicon}" alt="${bookmark.title}" loading="lazy"
-                         onerror="this.src='${defaultIcon}';"
                          style="width: 24px; height: 24px; border-radius: 4px;">
                 </div>
                 <div class="bookmark-info">
@@ -749,7 +785,7 @@ class MarkLauncher {
                 copyBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.copyToClipboard(copyBtn.dataset.url);
-                    this.showToast('链接已复制');
+                    // showToast已在copyToClipboard方法中处理
                 });
             }
 
@@ -775,11 +811,11 @@ class MarkLauncher {
         const descElement = emptyState.querySelector('p');
 
         if (this.searchMode === 'bookmark' && this.searchTerm) {
-            titleElement.textContent = '未找到匹配的书签';
-            descElement.textContent = `没有找到包含 "${this.searchTerm}" 的书签`;
+            titleElement.textContent = t('no_matching_bookmarks');
+            descElement.textContent = t('no_matching_bookmarks_desc', this.searchTerm);
         } else {
-            titleElement.textContent = '暂无书签';
-            descElement.textContent = '该分类下没有书签，可以通过浏览器书签管理器添加';
+            titleElement.textContent = t('no_bookmarks');
+            descElement.textContent = t('no_bookmarks_desc');
         }
     }
 
@@ -804,7 +840,7 @@ class MarkLauncher {
 
         bookmarkSections.innerHTML = '';
         emptyState.classList.remove('hidden');
-        emptyState.querySelector('h3').textContent = '出错了';
+        emptyState.querySelector('h3').textContent = t('error_title');
         emptyState.querySelector('p').textContent = message;
     }
 
@@ -825,31 +861,7 @@ class MarkLauncher {
         return url.substring(0, maxLength) + '...';
     }
 
-    /**
-     * 复制到剪贴板
-     */
-    async copyToClipboard(text) {
-        try {
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(text);
-            } else {
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-999999px';
-                textArea.style.top = '-999999px';
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                document.execCommand('copy');
-                textArea.remove();
-            }
-        } catch (error) {
-            console.error('复制失败:', error);
-            this.showToast('复制失败，请手动复制');
-        }
-    }
-
+    
     /**
      * 打开下载页面
      */
@@ -861,7 +873,6 @@ class MarkLauncher {
         } else {
             window.open('chrome://downloads', '_blank');
         }
-        this.showToast('打开下载页面');
     }
 
     /**
@@ -875,7 +886,6 @@ class MarkLauncher {
         } else {
             window.open('chrome://history', '_blank');
         }
-        this.showToast('打开历史记录');
     }
 
     /**
@@ -889,7 +899,6 @@ class MarkLauncher {
         } else {
             window.open('chrome://bookmarks', '_blank');
         }
-        this.showToast('打开书签管理器');
     }
 
     /**
@@ -915,7 +924,7 @@ class MarkLauncher {
                 if (chrome.runtime.lastError) {
                     console.error('保存设置失败:', chrome.runtime.lastError);
                 } else {
-                    this.showToast('设置已保存');
+                    this.showToast(t('settings_saved'));
                 }
                 resolve();
             });
@@ -934,6 +943,9 @@ class MarkLauncher {
         if (searchEngineRadio) {
             searchEngineRadio.checked = true;
         }
+
+        // 更新设置面板中的国际化文本
+        this.updateI18nElements();
 
         this.bindSettingsEvents();
     }
@@ -1009,19 +1021,13 @@ class MarkLauncher {
         const searchInput = document.getElementById('searchInput');
         if (!searchInput) return;
 
-        const searchEngineNames = {
-            google: 'Google',
-            bing: 'Bing',
-            baidu: '百度'
-        };
-
-        const currentEngine = searchEngineNames[this.settings.searchEngine] || 'Google';
-
         // 根据当前搜索模式更新提示词
         if (this.searchMode === 'bookmark') {
-            searchInput.placeholder = '搜索书签...';
+            searchInput.placeholder = t('search_bookmarks');
         } else {
-            searchInput.placeholder = `在 ${currentEngine} 中搜索...`;
+            // 获取搜索引擎的翻译名称
+            const engineKey = 'search_on_' + this.settings.searchEngine;
+            searchInput.placeholder = t(engineKey);
         }
     }
 
@@ -1408,9 +1414,8 @@ class MarkLauncher {
         const faviconUrl = this.getFaviconUrl(url);
         faviconElement.src = faviconUrl;
         faviconElement.alt = title;
-        faviconElement.onerror = () => {
-            faviconElement.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZDEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZjhmOWZhO3N0b3Atb3BhY2l0eToxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNlOWVjZWY7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHJ4PSIzIiBmaWxsPSJ1cmwoI2dyYWQxKSIgc3Ryb2tlPSIjZGVlMmU2IiBzdHJva2Utd2lkdGg9IjAuNSIvPgogIDxyZWN0IHg9IjIiIHk9IjMiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxIiByeD0iMC41IiBmaWxsPSIjODY4ZTk2Ii8+CiAgPHJlY3QgeD0iMiIgeT0iNiIgd2lkdGg9IjEyIiBoZWlnaHQ9IjEiIHJ4PSIwLjUiIGZpbGw9IiM4NjhlOTYiLz4KICA8cmVjdCB4PSIyIiB5PSI5IiB3aWR0aD0iMTIiIGhlaWdodD0iMSIgcng9IjAuNSIgZmlsbD0iIzg2OGU5NiIvPgogIDxyZWN0IHg9IjIiIHk9IjEyIiB3aWR0aD0iOCIgaGVpZ2h0PSIxIiByeD0iMC41IiBmaWxsPSIjODY4ZTk2Ii8+Cjwvc3ZnPg==';
-        };
+        // Chrome favicon API 不需要错误处理，因为Chrome会自动处理
+        // 删除了 onerror 处理器
 
         // 清空之前的二维码
         qrcodeCanvas.innerHTML = '';
@@ -1538,25 +1543,36 @@ class MarkLauncher {
      * 绑定二维码弹窗事件
      */
     bindQRCodeEvents(url) {
-        // 关闭按钮
+        // 清除之前的事件监听器
         const closeBtn = document.getElementById('closeQrcodeBtn');
+        const overlay = document.querySelector('.qrcode-overlay');
+        const copyBtn = document.getElementById('copyLinkBtn');
+
+        // 移除之前的监听器（如果存在）
+        closeBtn.onclick = null;
+        overlay.onclick = null;
+        copyBtn.onclick = null;
+
+        // 关闭按钮
         closeBtn.onclick = () => this.hideQRCodeModal();
 
         // 点击遮罩层关闭
-        const overlay = document.querySelector('.qrcode-overlay');
         overlay.onclick = () => this.hideQRCodeModal();
 
         // 复制链接按钮
-        const copyBtn = document.getElementById('copyLinkBtn');
-        copyBtn.onclick = () => this.copyToClipboard(url);
+        copyBtn.onclick = (e) => {
+            e.stopPropagation(); // 阻止事件冒泡
+            this.copyToClipboard(url);
+        };
 
-        // ESC键关闭
+        // ESC键关闭（确保只绑定一次）
         const handleEscape = (e) => {
             if (e.key === 'Escape') {
                 this.hideQRCodeModal();
                 document.removeEventListener('keydown', handleEscape);
             }
         };
+        document.removeEventListener('keydown', handleEscape); // 先移除
         document.addEventListener('keydown', handleEscape);
     }
 
@@ -1567,9 +1583,7 @@ class MarkLauncher {
         try {
             if (navigator.clipboard && window.isSecureContext) {
                 // 使用现代剪贴板API
-                navigator.clipboard.writeText(text).then(() => {
-                    this.showToast('链接已复制到剪贴板');
-                }).catch(() => {
+                navigator.clipboard.writeText(text).catch(() => {
                     this.fallbackCopyToClipboard(text);
                 });
             } else {
@@ -1596,17 +1610,10 @@ class MarkLauncher {
             textArea.focus();
             textArea.select();
 
-            const successful = document.execCommand('copy');
+            document.execCommand('copy');
             document.body.removeChild(textArea);
-
-            if (successful) {
-                this.showToast('链接已复制到剪贴板');
-            } else {
-                this.showToast('复制失败，请手动复制');
-            }
         } catch (error) {
             console.error('降级复制失败:', error);
-            this.showToast('复制失败，请手动复制');
         }
     }
 
@@ -1653,6 +1660,216 @@ class MarkLauncher {
      */
     getDefaultFaviconSvg() {
         return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZDEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZjhmOWZhO3N0b3Atb3BhY2l0eToxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNlOWVjZWY7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHJ4PSIzIiBmaWxsPSJ1cmwoI2dyYWQxKSIgc3Ryb2tlPSIjZGVlMmU2IiBzdHJva2Utd2lkdGg9IjAuNSIvPgogIDxyZWN0IHg9IjIiIHk9IjMiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxIiByeD0iMC41IiBmaWxsPSIjODY4ZTk2Ii8+CiAgPHJlY3QgeD0iMiIgeT0iNiIgd2lkdGg9IjEyIiBoZWlnaHQ9IjEiIHJ4PSIwLjUiIGZpbGw9IiM4NjhlOTYiLz4KICA8cmVjdCB4PSIyIiB5PSI5IiB3aWR0aD0iMTIiIGhlaWdodD0iMSIgcng9IjAuNSIgZmlsbD0iIzg2OGU5NiIvPgogIDxyZWN0IHg9IjIiIHk9IjEyIiB3aWR0aD0iOCIgaGVpZ2h0PSIxIiByeD0iMC41IiBmaWxsPSIjODY4ZTk2Ii8+Cjwvc3ZnPg==';
+    }
+
+    // ========== 国际化支持 ==========
+
+    /**
+     * 检测系统语言
+     */
+    detectLanguage() {
+        // 获取浏览器语言
+        const browserLang = navigator.language || navigator.userLanguage;
+
+        // 更严格的中文检测 - 只有明确是中文环境才使用中文
+        // 检查常见的中文语言代码
+        const chineseLangCodes = ['zh-CN', 'zh-SG', 'zh-MO', 'zh-HK', 'zh-TW'];
+
+        // 只有当浏览器语言明确是中文时才返回中文
+        if (chineseLangCodes.includes(browserLang)) {
+            return 'zh-CN';
+        }
+
+        // 对于 zh 这种模糊的匹配，需要进一步检查
+        if (browserLang.startsWith('zh')) {
+            // 检查用户的首选语言列表
+            const languages = navigator.languages || [browserLang];
+
+            // 如果用户的语言偏好中英文排在前面，则使用英文
+            const hasEnglishFirst = languages.some((lang, index) => {
+                return index < 2 && (lang.startsWith('en') || lang === 'en');
+            });
+
+            if (hasEnglishFirst) {
+                return 'en';
+            }
+
+            return 'zh-CN';
+        }
+
+        // 默认返回英文
+        return 'en';
+    }
+
+    /**
+     * 获取翻译文本
+     */
+    t(key, params = {}) {
+        if (typeof t === 'function') {
+            // 如果全局t函数存在（从i18n.js加载），使用它
+            return t(key, params);
+        }
+
+        // 否则使用内置的基本翻译
+        const basicTranslations = {
+            'zh-CN': {
+                'bookmarks_bar': 'Bookmarks Bar',
+                'other_bookmarks': 'Other Bookmarks',
+                'all_bookmarks': '全部书签',
+                'pinned': '置顶',
+                'search_bookmarks': '搜索书签...',
+                'search_on_google': '在 Google 中搜索...',
+                'search_on_bing': '在 Bing 中搜索...',
+                'search_on_baidu': '在百度中搜索...',
+                'no_bookmarks': '暂无书签',
+                'unnamed_folder': '未命名文件夹'
+            },
+            'en': {
+                'bookmarks_bar': 'Bookmarks Bar',
+                'other_bookmarks': 'Other Bookmarks',
+                'all_bookmarks': 'All Bookmarks',
+                'pinned': 'Pinned',
+                'search_bookmarks': 'Search bookmarks...',
+                'search_on_google': 'Search on Google...',
+                'search_on_bing': 'Search on Bing...',
+                'search_on_baidu': 'Search on Baidu...',
+                'no_bookmarks': 'No Bookmarks',
+                'unnamed_folder': 'Unnamed Folder'
+            }
+        };
+
+        const translations = basicTranslations[this.currentLanguage] || basicTranslations['en'];
+        let text = translations[key] || key;
+
+        // 替换参数占位符
+        Object.keys(params).forEach(param => {
+            text = text.replace(`{${param}}`, params[param]);
+        });
+
+        return text;
+    }
+
+    /**
+     * 初始化界面文本
+     */
+    initializeUIText() {
+        // 更新所有带 data-i18n 属性的元素
+        this.updateI18nElements();
+
+        // 更新主界面文本
+        this.updateMainUIText();
+
+        // 更新按钮提示文本
+        this.updateButtonTitles();
+
+        // 更新设置界面文本
+        this.updateSettingsUIText();
+    }
+
+    /**
+     * 更新所有带 data-i18n 属性的元素
+     */
+    updateI18nElements() {
+        try {
+            const textElements = document.querySelectorAll('[data-i18n]');
+            textElements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (key) {
+                    element.textContent = t(key);
+                }
+            });
+
+            const elements = document.querySelectorAll('*');
+            elements.forEach(element => {
+                Array.from(element.attributes).forEach(attr => {
+                    if (attr.name.startsWith('data-i18n-') && attr.name !== 'data-i18n') {
+                        const targetAttr = attr.name.replace('data-i18n-', '');
+                        const messageKey = attr.value;
+                        if (messageKey) {
+                            this.applyI18nAttribute(element, targetAttr, messageKey);
+                        }
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('updateI18nElements 执行失败:', error);
+        }
+    }
+
+    /**
+     * 将翻译写入指定属性
+     */
+    applyI18nAttribute(element, attributeName, key) {
+        if (!element || !attributeName || !key) {
+            return;
+        }
+
+        const message = t(key);
+        if (!message) {
+            return;
+        }
+
+        if (attributeName === 'html') {
+            element.innerHTML = message;
+        } else if (attributeName === 'text') {
+            element.textContent = message;
+        } else {
+            element.setAttribute(attributeName, message);
+        }
+    }
+
+    /**
+     * 更新主界面文本
+     */
+    updateMainUIText() {
+        // 更新搜索框占位符
+        this.updateSearchPlaceholder();
+
+        // 更新导航标签
+        const bookmarksBarTab = document.getElementById('bookmarksBarTab');
+        const otherBookmarksTab = document.getElementById('otherBookmarksTab');
+
+        if (bookmarksBarTab) {
+            const span = bookmarksBarTab.querySelector('span');
+            if (span) span.textContent = t('bookmarks_bar');
+        }
+
+        if (otherBookmarksTab) {
+            const span = otherBookmarksTab.querySelector('span');
+            if (span) span.textContent = t('other_bookmarks');
+        }
+    }
+
+    /**
+     * 更新按钮提示文本
+     */
+    updateButtonTitles() {
+        try {
+            const buttons = [
+            { id: 'downloadBtn', title: t('download') },
+            { id: 'historyBtn', title: t('history') },
+            { id: 'bookmarksBtn', title: t('bookmarks_manager') },
+            { id: 'settingsBtn', title: t('settings') },
+            { id: 'clearSearch', title: t('clear_search') }
+        ];
+
+        buttons.forEach(btn => {
+            const element = document.getElementById(btn.id);
+            if (element) {
+                element.setAttribute('title', btn.title);
+            }
+        });
+        } catch (error) {
+            console.error('updateButtonTitles 执行失败:', error);
+        }
+    }
+
+    /**
+     * 更新设置界面文本
+     */
+    updateSettingsUIText() {
+        // 这里在设置面板打开时会被调用
+        // 具体实现在openSettingsModal方法中
     }
 }
 

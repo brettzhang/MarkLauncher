@@ -17,13 +17,13 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
                     </svg>
-                    <span>Bookmarks Bar</span>
+                    <span data-i18n="bookmarks_bar">Bookmarks Bar</span>
                 </button>
                 <button class="primary-nav-item" data-primary="other_bookmarks" id="otherBookmarksTab">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
                     </svg>
-                    <span>Other Bookmarks</span>
+                    <span data-i18n="other_bookmarks">Other Bookmarks</span>
                 </button>
             </nav>
 
@@ -92,7 +92,7 @@
             <!-- 左侧二级导航区域 -->
             <aside class="secondary-navigation">
                 <div class="nav-header">
-                    <h2 id="secondaryNavTitle">文件夹</h2>
+                    <h2 id="secondaryNavTitle" data-i18n="bookmarks_bar_folders">Bookmarks Bar Folders</h2>
                     <span id="folderCount" class="folder-count">0</span>
                 </div>
                 <nav class="folder-navigation">
@@ -108,12 +108,12 @@
                 <div id="pinnedSection" class="pinned-section" style="display: none;">
                     <div class="bookmark-section">
                         <div class="bookmark-section-header">
-                            <h2 class="bookmark-section-title">
-                                <svg class="bookmark-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                </svg>
-                                置顶
-                            </h2>
+                    <h2 class="bookmark-section-title">
+                        <svg class="bookmark-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <span data-i18n="pinned">Pinned</span>
+                    </h2>
                             <span class="bookmark-section-count" id="pinnedCount">0</span>
                         </div>
                         <div id="pinnedList" class="bookmark-list">
@@ -131,8 +131,8 @@
                     <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M19 11l-7-7-7 7m14 0l-7 7-7-7"/>
                     </svg>
-                    <h3>暂无书签</h3>
-                    <p>该分类下没有书签</p>
+                    <h3 data-i18n="no_bookmarks">No Bookmarks</h3>
+                    <p data-i18n="no_bookmarks_desc">No bookmarks in this category</p>
                 </div>
             </section>
         </main>
@@ -141,7 +141,7 @@
     <!-- 加载提示 -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-spinner"></div>
-        <p>正在加载书签...</p>
+        <p data-i18n="loading_text">Loading bookmarks...</p>
     </div>
 
     <!-- 设置弹窗 -->
@@ -149,7 +149,7 @@
         <div class="settings-overlay"></div>
         <div class="settings-dialog">
             <div class="settings-header">
-                <h2>设置</h2>
+                <h2 data-i18n="settings">Settings</h2>
                 <button id="closeSettingsBtn" class="close-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -166,13 +166,13 @@
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                             </svg>
-                            <span>搜索设置</span>
+                            <span data-i18n="search_settings">Search Settings</span>
                         </li>
                         <li class="settings-nav-item" data-panel="about">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                             </svg>
-                            <span>关于</span>
+                            <span data-i18n="about">About</span>
                         </li>
                     </ul>
                 </nav>
@@ -182,16 +182,16 @@
                     <!-- 搜索设置面板 -->
                     <div class="settings-panel active" id="searchPanel">
                         <div class="panel-content">
-                            <h3>搜索引擎选择</h3>
-                            <p class="panel-description">选择您偏好的搜索引擎</p>
+                            <h3 data-i18n="search_engine_selection">Search Engine Selection</h3>
+                            <p class="panel-description" data-i18n="search_engine_desc">Choose your preferred search engine</p>
 
                             <div class="setting-group">
                                 <label class="setting-option">
                                     <input type="radio" name="searchEngine" value="google" checked>
                                     <span class="radio-indicator"></span>
                                     <div class="option-info">
-                                        <div class="option-title">Google</div>
-                                        <div class="option-description">全球最大的搜索引擎</div>
+                                        <div class="option-title" data-i18n="google">Google</div>
+                                        <div class="option-description" data-i18n="google_desc">The world's largest search engine</div>
                                     </div>
                                 </label>
 
@@ -199,8 +199,8 @@
                                     <input type="radio" name="searchEngine" value="bing">
                                     <span class="radio-indicator"></span>
                                     <div class="option-info">
-                                        <div class="option-title">Bing</div>
-                                        <div class="option-description">微软公司的搜索引擎</div>
+                                        <div class="option-title" data-i18n="bing">Bing</div>
+                                        <div class="option-description" data-i18n="bing_desc">Microsoft's search engine</div>
                                     </div>
                                 </label>
 
@@ -208,8 +208,8 @@
                                     <input type="radio" name="searchEngine" value="baidu">
                                     <span class="radio-indicator"></span>
                                     <div class="option-info">
-                                        <div class="option-title">百度</div>
-                                        <div class="option-description">中文搜索引擎</div>
+                                        <div class="option-title" data-i18n="baidu">Baidu</div>
+                                        <div class="option-description" data-i18n="baidu_desc">Chinese search engine</div>
                                     </div>
                                 </label>
                             </div>
@@ -225,17 +225,17 @@
                                         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                                     </svg>
                                 </div>
-                                <h3>MarkLauncher</h3>
-                                <p class="app-version">版本 1.0.0</p>
-                                <p class="app-description">一个简洁高效的Chrome书签启动器扩展</p>
+                                <h3 data-i18n="app_name">MarkLauncher</h3>
+                                <p class="app-version" data-i18n="app_version">Version 1.0.0</p>
+                                <p class="app-description" data-i18n="app_description">A simple and efficient Chrome bookmark launcher extension</p>
 
                                 <div class="app-features">
-                                    <h4>主要功能</h4>
+                                    <h4 data-i18n="main_features">Main Features</h4>
                                     <ul>
-                                        <li>Chrome原生书签结构展示</li>
-                                        <li>智能搜索与多引擎支持</li>
-                                        <li>简洁现代的界面设计</li>
-                                        <li>快捷键操作支持</li>
+                                        <li data-i18n="feature1">Native Chrome bookmark structure display</li>
+                                        <li data-i18n="feature2">Smart search with multi-engine support</li>
+                                        <li data-i18n="feature3">Clean and modern interface design</li>
+                                        <li data-i18n="feature4">Keyboard shortcut support</li>
                                     </ul>
                                 </div>
                             </div>
@@ -252,20 +252,20 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
-            <span>置顶</span>
+            <span data-i18n="pin">Pin to Top</span>
         </div>
         <div class="context-menu-item" data-action="unpin">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
-            <span>取消置顶</span>
+            <span data-i18n="unpin">Unpin from Top</span>
         </div>
         <div class="context-menu-divider"></div>
         <div class="context-menu-item" data-action="qrcode">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/>
             </svg>
-            <span>二维码分享</span>
+            <span data-i18n="qrcode_share">Share QR Code</span>
         </div>
     </div>
 
@@ -278,7 +278,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/>
                     </svg>
-                    二维码分享
+                    <span data-i18n="qrcode_title">QR Code Share</span>
                 </h2>
                 <button id="closeQrcodeBtn" class="close-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -299,7 +299,7 @@
                         </div>
                     </div>
                     <div class="qrcode-instructions">
-                        <p>📱 使用手机扫描上方二维码快速访问此网站</p>
+                        <p data-i18n="use_phone_scan">📱 Scan the QR code above with your phone to quickly access this website</p>
                     </div>
                 </div>
                 <div class="qrcode-container">
@@ -311,7 +311,7 @@
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
                             </svg>
-                            复制链接
+                            <span data-i18n="copy_link">Copy Link</span>
                         </button>
                     </div>
                 </div>
