@@ -283,10 +283,7 @@ class MarkLauncher {
 
         // 键盘事件处理
         searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                this.toggleSearchMode();
-            } else if (e.key === 'Enter' && this.searchTerm && this.searchMode === 'web') {
+            if (e.key === 'Enter' && this.searchTerm && this.searchMode === 'web') {
                 this.performGoogleSearch();
             }
         });
@@ -330,7 +327,7 @@ class MarkLauncher {
             // Tab键快速切换搜索模式
             if (e.key === 'Tab' && document.activeElement === searchInput) {
                 e.preventDefault();
-                this.switchSearchMode(this.searchMode === 'bookmark' ? 'web' : 'bookmark');
+                this.toggleSearchMode();
             }
 
             // Ctrl+K 聚焦搜索

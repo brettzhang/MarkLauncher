@@ -1,4 +1,12 @@
 {
+  "extension_name": {
+    "message": "MarkLauncher - 书签启动器",
+    "description": "扩展名称"
+  },
+  "extension_description": {
+    "message": "一个简洁高效的新标签页书签启动器，左侧文件夹导航，右侧展示书签详情",
+    "description": "Chrome 扩展描述"
+  },
   "bookmarks_bar": {
     "message": "Bookmarks Bar",
     "description": "The title for bookmarks bar folder"

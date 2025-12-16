@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "MarkLauncher - Bookmark Launcher",
-  "description": "A simple and efficient new tab bookmark launcher with folder navigation on the left and bookmark details on the right",
+  "name": "__MSG_extension_name__",
+  "description": "__MSG_extension_description__",
   "version": "1.0.0",
   "default_locale": "en",
   "chrome_url_overrides": {
@@ -27,6 +27,6 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "MarkLauncher Settings"
+    "default_title": "__MSG_settings__"
   }
 }
