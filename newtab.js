@@ -41,6 +41,7 @@ class MarkLauncher {
         // 置顶功能相关
         this.pinnedBookmarks = []; // 存储置顶书签的ID列表
         this.contextMenuTarget = null; // 右键菜单的目标书签项
+        this.scrollAnimationFrame = null; // 记录当前滚动动画帧编号
 
         // 搜索引擎URL映射
         this.searchEngineUrls = {
@@ -319,6 +320,11 @@ class MarkLauncher {
         // 书签管理器按钮
         document.getElementById('bookmarksBtn').addEventListener('click', () => {
             this.openBookmarksPage();
+        });
+
+        // 扩展管理按钮
+        document.getElementById('extensionsBtn').addEventListener('click', () => {
+            this.openExtensionsPage();
         });
 
         // 设置按钮
@@ -715,13 +721,67 @@ class MarkLauncher {
      * 滚动到指定分组
      */
     scrollToSection(folderId) {
-        const section = document.getElementById(`section-${folderId}`);
-        if (section) {
-            section.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
+        if (folderId === 'root') {
+            const container = document.querySelector('.bookmark-content');
+            if (container) {
+                this.smoothScroll(container, 0);
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            return;
         }
+
+        const section = document.getElementById(`section-${folderId}`);
+        if (!section) {
+            return;
+        }
+
+        const container = document.querySelector('.bookmark-content');
+        if (!container) {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
+
+        const computedStyle = window.getComputedStyle(section);
+        const scrollMarginTop = parseInt(computedStyle.scrollMarginTop, 10) || 0;
+        const sectionRect = section.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const offsetWithinContainer = sectionRect.top - containerRect.top;
+        const targetY = Math.max(offsetWithinContainer + container.scrollTop - scrollMarginTop, 0);
+
+        this.smoothScroll(container, targetY);
+    }
+
+    /**
+     * 自定义滚动动画，提升跳转速度的同时保留平滑过渡
+     */
+    smoothScroll(container, targetY, duration = 220) {
+        if (!container) return;
+
+        if (this.scrollAnimationFrame) {
+            cancelAnimationFrame(this.scrollAnimationFrame);
+            this.scrollAnimationFrame = null;
+        }
+
+        const startY = container.scrollTop;
+        const distance = targetY - startY;
+        const startTime = performance.now();
+        const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+        const step = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easeOutCubic(progress);
+            container.scrollTop = startY + distance * easedProgress;
+
+            if (progress < 1) {
+                this.scrollAnimationFrame = requestAnimationFrame(step);
+            } else {
+                this.scrollAnimationFrame = null;
+            }
+        };
+
+        this.scrollAnimationFrame = requestAnimationFrame(step);
     }
 
     /**
@@ -1073,6 +1133,19 @@ class MarkLauncher {
             });
         } else {
             window.open('chrome://bookmarks', '_blank');
+        }
+    }
+
+    /**
+     * 打开扩展管理页面
+     */
+    openExtensionsPage() {
+        if (chrome.tabs && chrome.tabs.create) {
+            chrome.tabs.create({
+                url: 'chrome://extensions'
+            });
+        } else {
+            window.open('chrome://extensions', '_blank');
         }
     }
 
@@ -2118,6 +2191,7 @@ class MarkLauncher {
             { id: 'downloadBtn', title: t('download') },
             { id: 'historyBtn', title: t('history') },
             { id: 'bookmarksBtn', title: t('bookmarks_manager') },
+            { id: 'extensionsBtn', title: t('extensions') },
             { id: 'settingsBtn', title: t('settings') },
             { id: 'clearSearch', title: t('clear_search') }
         ];

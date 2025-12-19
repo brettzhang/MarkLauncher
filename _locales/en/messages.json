@@ -83,6 +83,10 @@
     "message": "Bookmark Manager",
     "description": "Text for bookmarks manager button tooltip"
   },
+  "extensions": {
+    "message": "Extensions",
+    "description": "Text for extensions manager button tooltip"
+  },
   "settings": {
     "message": "Settings",
     "description": "Text for settings button tooltip"
