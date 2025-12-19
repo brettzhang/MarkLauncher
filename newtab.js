@@ -80,6 +80,7 @@ class MarkLauncher {
         try {
             this.updateI18nElements();
             this.updateMainUIText();
+            this.updateVersionInfo();
         } catch (error) {
             console.error('初始化国际化失败:', error);
         }
@@ -2114,7 +2115,7 @@ class MarkLauncher {
             const textElements = document.querySelectorAll('[data-i18n]');
             textElements.forEach(element => {
                 const key = element.getAttribute('data-i18n');
-                if (key) {
+                if (key && !element.hasAttribute('data-i18n-skip')) {
                     element.textContent = t(key);
                 }
             });
@@ -2180,6 +2181,29 @@ class MarkLauncher {
         }
 
         this.updateMobileBreadcrumb();
+    }
+
+    /**
+     * 根据manifest版本更新关于页面版本号
+     */
+    updateVersionInfo() {
+        try {
+            const versionElement = document.querySelector('[data-i18n="app_version"]');
+            if (!versionElement) {
+                return;
+            }
+
+            const manifest = chrome.runtime && typeof chrome.runtime.getManifest === 'function'
+                ? chrome.runtime.getManifest()
+                : null;
+            const manifestVersion = manifest && manifest.version ? manifest.version : '';
+
+            const localizedText = t('app_version', manifestVersion);
+            const fallbackText = `Version ${manifestVersion || ''}`;
+            versionElement.textContent = localizedText || fallbackText;
+        } catch (error) {
+            console.error('更新版本号失败:', error);
+        }
     }
 
     /**

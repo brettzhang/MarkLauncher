@@ -160,7 +160,7 @@
     "description": "The application name"
   },
   "app_version": {
-    "message": "版本 1.0.0",
+    "message": "版本 $1",
     "description": "The application version"
   },
   "app_description": {
