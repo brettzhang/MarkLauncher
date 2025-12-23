@@ -808,34 +808,22 @@ body {
 .bookmark-info {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
 }
 
 .bookmark-title {
     font-size: 13px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin-bottom: 0;
     line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-}
-
-.bookmark-url {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-decoration: none;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: var(--transition-fast);
-    letter-spacing: 0.01em;
-}
-
-.bookmark-url:hover {
-    color: var(--primary-color);
 }
 
 .bookmark-actions {
@@ -1558,9 +1546,11 @@ body {
     text-align: center;
     flex: none;
     width: 100%;
+    display: block;
+    height: auto;
+    margin-top: 6px;
 }
 
-.pinned-section .bookmark-url,
 .pinned-section .bookmark-actions {
     display: none;
 }

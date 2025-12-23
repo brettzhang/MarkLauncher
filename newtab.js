@@ -966,16 +966,16 @@ class MarkLauncher {
      * 渲染单个书签项
      */
     renderBookmarkItem(bookmark) {
-        const defaultIcon = this.getDefaultFaviconSvg();
+        const isPinned = this.isBookmarkedPinned(bookmark.id);
+        const pinnedClass = isPinned ? ' pinned' : '';
         return `
-            <div class="bookmark-item" data-url="${bookmark.url}" data-id="${bookmark.id}">
+            <div class="bookmark-item${pinnedClass}" data-url="${bookmark.url}" data-id="${bookmark.id}">
                 <div class="bookmark-favicon">
                     <img src="${bookmark.favicon}" alt="${bookmark.title}" loading="lazy"
                          style="width: 24px; height: 24px; border-radius: 4px;">
                 </div>
                 <div class="bookmark-info">
                     <div class="bookmark-title">${this.escapeHtml(bookmark.title)}</div>
-                    <div class="bookmark-url">${this.escapeHtml(this.truncateUrl(bookmark.url))}</div>
                 </div>
                 <div class="bookmark-actions">
                     <button class="action-btn copy-url" title="复制链接" data-url="${bookmark.url}">
@@ -1006,46 +1006,55 @@ class MarkLauncher {
      */
     bindBookmarkEvents() {
         document.querySelectorAll('.bookmark-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                if (e.target.closest('.bookmark-actions')) {
-                    return;
-                }
+            this.bindBookmarkItemEvents(item);
+        });
+    }
 
-                const url = item.dataset.url;
-                if (e.ctrlKey || e.metaKey) {
-                    if (chrome.tabs && chrome.tabs.create) {
-                        chrome.tabs.create({ url });
-                    } else {
-                        window.open(url, '_blank');
-                    }
-                } else {
-                    window.location.href = url;
-                }
-            });
+    bindBookmarkItemEvents(item) {
+        if (!item || item.dataset.eventsBound === 'true') {
+            return;
+        }
+        item.dataset.eventsBound = 'true';
 
-            // 操作按钮事件
-            const copyBtn = item.querySelector('.copy-url');
-            const newTabBtn = item.querySelector('.open-new');
-
-            if (copyBtn) {
-                copyBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.copyToClipboard(copyBtn.dataset.url);
-                    // showToast已在copyToClipboard方法中处理
-                });
+        item.addEventListener('click', (e) => {
+            if (e.target.closest('.bookmark-actions')) {
+                return;
             }
 
-            if (newTabBtn) {
-                newTabBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (chrome.tabs && chrome.tabs.create) {
-                        chrome.tabs.create({ url: newTabBtn.dataset.url });
-                    } else {
-                        window.open(newTabBtn.dataset.url, '_blank');
-                    }
-                });
+            const url = item.dataset.url;
+            if (e.ctrlKey || e.metaKey) {
+                if (chrome.tabs && chrome.tabs.create) {
+                    chrome.tabs.create({ url });
+                } else {
+                    window.open(url, '_blank');
+                }
+            } else {
+                window.location.href = url;
             }
         });
+
+        // 操作按钮事件
+        const copyBtn = item.querySelector('.copy-url');
+        const newTabBtn = item.querySelector('.open-new');
+
+        if (copyBtn) {
+            copyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.copyToClipboard(copyBtn.dataset.url);
+                // showToast已在copyToClipboard方法中处理
+            });
+        }
+
+        if (newTabBtn) {
+            newTabBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (chrome.tabs && chrome.tabs.create) {
+                    chrome.tabs.create({ url: newTabBtn.dataset.url });
+                } else {
+                    window.open(newTabBtn.dataset.url, '_blank');
+                }
+            });
+        }
     }
 
     /**
@@ -1099,15 +1108,6 @@ class MarkLauncher {
         return div.innerHTML;
     }
 
-    /**
-     * 截断URL显示
-     */
-    truncateUrl(url, maxLength = 50) {
-        if (url.length <= maxLength) return url;
-        return url.substring(0, maxLength) + '...';
-    }
-
-    
     /**
      * 打开下载页面
      */
@@ -1509,7 +1509,8 @@ class MarkLauncher {
         if (!this.pinnedBookmarks.includes(bookmarkId)) {
             this.pinnedBookmarks.push(bookmarkId);
             await this.savePinnedBookmarks();
-            this.render();
+            this.renderPinnedSection();
+            this.refreshBookmarkItem(bookmarkId);
         }
     }
 
@@ -1521,7 +1522,8 @@ class MarkLauncher {
         if (index > -1) {
             this.pinnedBookmarks.splice(index, 1);
             await this.savePinnedBookmarks();
-            this.render();
+            this.renderPinnedSection();
+            this.refreshBookmarkItem(bookmarkId);
         }
     }
 
@@ -1560,6 +1562,28 @@ class MarkLauncher {
         return allBookmarks;
     }
 
+    getBookmarkById(bookmarkId) {
+        return this.getAllBookmarks().find(bookmark => bookmark.id === bookmarkId) || null;
+    }
+
+    refreshBookmarkItem(bookmarkId) {
+        const existingItem = document.querySelector(`.bookmark-item[data-id="${bookmarkId}"]`);
+        if (!existingItem) {
+            return;
+        }
+
+        const bookmarkData = this.getBookmarkById(bookmarkId);
+        if (!bookmarkData) {
+            return;
+        }
+
+        const temp = document.createElement('div');
+        temp.innerHTML = this.renderBookmarkItem(bookmarkData).trim();
+        const newItem = temp.firstElementChild;
+        existingItem.replaceWith(newItem);
+        this.bindBookmarkItemEvents(newItem);
+    }
+
     /**
      * 渲染置顶区域
      */
@@ -1572,6 +1596,8 @@ class MarkLauncher {
 
         if (pinnedBookmarksData.length === 0) {
             pinnedSection.style.display = 'none';
+            pinnedCount.textContent = '0';
+            pinnedList.innerHTML = '';
             return;
         }
 
@@ -1581,6 +1607,7 @@ class MarkLauncher {
         pinnedList.innerHTML = pinnedBookmarksData
             .map(bookmark => this.renderBookmarkItem(bookmark))
             .join('');
+        this.bindBookmarkEvents();
     }
 
     /**
