@@ -1,0 +1,274 @@
+{
+  "extension_name": {
+    "message": "MarkLauncher - 书签启动器",
+    "description": "扩展名称"
+  },
+  "extension_description": {
+    "message": "一个简洁高效的新标签页书签启动器，左侧文件夹导航，右侧展示书签详情",
+    "description": "Chrome 扩展描述"
+  },
+  "bookmarks_bar": {
+    "message": "Bookmarks Bar",
+    "description": "The title for bookmarks bar folder"
+  },
+  "other_bookmarks": {
+    "message": "Other Bookmarks",
+    "description": "The title for other bookmarks folder"
+  },
+  "all_bookmarks": {
+    "message": "全部书签",
+    "description": "The title for showing all bookmarks option"
+  },
+  "pinned": {
+    "message": "置顶",
+    "description": "The title for pinned bookmarks section"
+  },
+  "search_bookmarks": {
+    "message": "搜索书签...",
+    "description": "Placeholder text for bookmark search input"
+  },
+  "search_on_google": {
+    "message": "在 Google 中搜索...",
+    "description": "Placeholder text for Google search"
+  },
+  "search_on_bing": {
+    "message": "在 Bing 中搜索...",
+    "description": "Placeholder text for Bing search"
+  },
+  "search_on_baidu": {
+    "message": "在百度中搜索...",
+    "description": "Placeholder text for Baidu search"
+  },
+  "search_results_title": {
+    "message": "搜索结果",
+    "description": "The title for search results section"
+  },
+  "bookmarks_bar_folders": {
+    "message": "Bookmarks Bar 文件夹",
+    "description": "The title for bookmarks bar folders section"
+  },
+  "other_bookmarks_folders": {
+    "message": "Other Bookmarks 文件夹",
+    "description": "The title for other bookmarks folders section"
+  },
+  "bookmarks_bar_title": {
+    "message": "书签栏",
+    "description": "The title for bookmarks bar bookmarks section"
+  },
+  "no_bookmarks": {
+    "message": "暂无书签",
+    "description": "Text shown when there are no bookmarks"
+  },
+  "no_bookmarks_desc": {
+    "message": "该分类下没有书签",
+    "description": "Description shown when there are no bookmarks"
+  },
+  "no_matching_bookmarks": {
+    "message": "未找到匹配的书签",
+    "description": "Text shown when no bookmarks match search"
+  },
+  "no_matching_bookmarks_desc": {
+    "message": "没有找到包含 \"$1\" 的书签",
+    "description": "Description shown when no bookmarks match search, $1 is the search term"
+  },
+  "download": {
+    "message": "下载",
+    "description": "Text for downloads button tooltip"
+  },
+  "history": {
+    "message": "历史记录",
+    "description": "Text for history button tooltip"
+  },
+  "bookmarks_manager": {
+    "message": "书签管理器",
+    "description": "Text for bookmarks manager button tooltip"
+  },
+  "extensions": {
+    "message": "扩展管理",
+    "description": "Text for extensions manager button tooltip"
+  },
+  "settings": {
+    "message": "设置",
+    "description": "Text for settings button tooltip"
+  },
+  "copy_link": {
+    "message": "复制链接",
+    "description": "Text for copy link action"
+  },
+  "open_new_tab": {
+    "message": "新标签页打开",
+    "description": "Text for open in new tab action"
+  },
+  "pin": {
+    "message": "置顶",
+    "description": "Text for pin bookmark action"
+  },
+  "unpin": {
+    "message": "取消置顶",
+    "description": "Text for unpin bookmark action"
+  },
+  "qrcode_share": {
+    "message": "二维码分享",
+    "description": "Text for QR code share action"
+  },
+  "clear_search": {
+    "message": "清除搜索",
+    "description": "Text for clear search button tooltip"
+  },
+  "search_settings": {
+    "message": "搜索设置",
+    "description": "The title for search settings panel"
+  },
+  "about": {
+    "message": "关于",
+    "description": "The title for about panel"
+  },
+  "search_engine_selection": {
+    "message": "搜索引擎选择",
+    "description": "The title for search engine selection"
+  },
+  "search_engine_desc": {
+    "message": "选择您偏好的搜索引擎",
+    "description": "Description for search engine selection"
+  },
+  "google": {
+    "message": "Google",
+    "description": "Google search engine name"
+  },
+  "google_desc": {
+    "message": "全球最大的搜索引擎",
+    "description": "Description for Google search engine"
+  },
+  "bing": {
+    "message": "Bing",
+    "description": "Bing search engine name"
+  },
+  "bing_desc": {
+    "message": "微软公司的搜索引擎",
+    "description": "Description for Bing search engine"
+  },
+  "baidu": {
+    "message": "百度",
+    "description": "Baidu search engine name"
+  },
+  "baidu_desc": {
+    "message": "中文搜索引擎",
+    "description": "Description for Baidu search engine"
+  },
+  "app_name": {
+    "message": "MarkLauncher",
+    "description": "The application name"
+  },
+  "app_version": {
+    "message": "版本 $1",
+    "description": "The application version"
+  },
+  "app_description": {
+    "message": "一个简洁高效的Chrome书签启动器扩展",
+    "description": "The application description"
+  },
+  "main_features": {
+    "message": "主要功能",
+    "description": "The main features title"
+  },
+  "feature1": {
+    "message": "Chrome原生书签结构展示",
+    "description": "Feature 1 description"
+  },
+  "feature2": {
+    "message": "智能搜索与多引擎支持",
+    "description": "Feature 2 description"
+  },
+  "feature3": {
+    "message": "简洁现代的界面设计",
+    "description": "Feature 3 description"
+  },
+  "feature4": {
+    "message": "快捷键操作支持",
+    "description": "Feature 4 description"
+  },
+  "qrcode_title": {
+    "message": "二维码分享",
+    "description": "The title for QR code sharing modal"
+  },
+  "use_phone_scan": {
+    "message": "📱 使用手机扫描上方二维码快速访问此网站",
+    "description": "Instruction text for QR code sharing"
+  },
+  "loading_text": {
+    "message": "正在加载书签...",
+    "description": "Text shown while loading bookmarks"
+  },
+  "error_title": {
+    "message": "出错了",
+    "description": "The title for error message"
+  },
+  "chrome_api_error": {
+    "message": "Chrome API不可用，请确保在Chrome浏览器中运行此扩展",
+    "description": "Error message when Chrome API is not available"
+  },
+  "load_bookmarks_failed": {
+    "message": "加载书签失败",
+    "description": "Error message when loading bookmarks fails"
+  },
+  "link_copied": {
+    "message": "链接已复制",
+    "description": "Success message when link is copied"
+  },
+  "link_copy_failed": {
+    "message": "复制失败，请手动复制",
+    "description": "Error message when copy fails"
+  },
+  "settings_saved": {
+    "message": "设置已保存",
+    "description": "Success message when settings are saved"
+  },
+  "unnamed_folder": {
+    "message": "未命名文件夹",
+    "description": "Default name for unnamed bookmark folders"
+  },
+  "theme_light": {
+    "message": "浅色",
+    "description": "Light theme option"
+  },
+  "theme_light_desc": {
+    "message": "明亮清爽的界面风格",
+    "description": "Light theme description"
+  },
+  "theme_dark": {
+    "message": "深色",
+    "description": "Dark theme option"
+  },
+  "theme_dark_desc": {
+    "message": "夜间友好的暗色体验",
+    "description": "Dark theme description"
+  },
+  "theme_system": {
+    "message": "跟随系统",
+    "description": "System theme option"
+  },
+  "theme_system_desc": {
+    "message": "根据系统外观自动切换",
+    "description": "System theme description"
+  },
+  "theme_button_title": {
+    "message": "主题设置",
+    "description": "Tooltip for theme toggle button"
+  },
+  "toggle_navigation": {
+    "message": "切换导航",
+    "description": "Tooltip for mobile navigation toggle"
+  },
+  "open_actions_menu": {
+    "message": "打开操作菜单",
+    "description": "Tooltip for mobile actions dropdown"
+  },
+  "appearance": {
+    "message": "外观",
+    "description": "Appearance settings label"
+  },
+  "appearance_desc": {
+    "message": "选择偏好的配色模式",
+    "description": "Appearance panel description"
+  }
+}

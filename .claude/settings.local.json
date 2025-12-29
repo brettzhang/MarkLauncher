@@ -1,0 +1,6 @@
+{
+  "enabledMcpjsonServers": [
+    "web-reader"
+  ],
+  "enableAllProjectMcpServers": true
+}

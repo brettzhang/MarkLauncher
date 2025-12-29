@@ -1,0 +1,274 @@
+{
+  "extension_name": {
+    "message": "MarkLauncher - Bookmark Launcher",
+    "description": "Extension display name"
+  },
+  "extension_description": {
+    "message": "A simple and efficient new tab bookmark launcher with folder navigation on the left and bookmark details on the right",
+    "description": "Extension description for Chrome Web Store"
+  },
+  "bookmarks_bar": {
+    "message": "Bookmarks Bar",
+    "description": "The title for bookmarks bar folder"
+  },
+  "other_bookmarks": {
+    "message": "Other Bookmarks",
+    "description": "The title for other bookmarks folder"
+  },
+  "all_bookmarks": {
+    "message": "All Bookmarks",
+    "description": "The title for showing all bookmarks option"
+  },
+  "pinned": {
+    "message": "Pinned",
+    "description": "The title for pinned bookmarks section"
+  },
+  "search_bookmarks": {
+    "message": "Search bookmarks...",
+    "description": "Placeholder text for bookmark search input"
+  },
+  "search_on_google": {
+    "message": "Search on Google...",
+    "description": "Placeholder text for Google search"
+  },
+  "search_on_bing": {
+    "message": "Search on Bing...",
+    "description": "Placeholder text for Bing search"
+  },
+  "search_on_baidu": {
+    "message": "Search on Baidu...",
+    "description": "Placeholder text for Baidu search"
+  },
+  "search_results_title": {
+    "message": "Search Results",
+    "description": "The title for search results section"
+  },
+  "bookmarks_bar_folders": {
+    "message": "Bookmarks Bar Folders",
+    "description": "The title for bookmarks bar folders section"
+  },
+  "other_bookmarks_folders": {
+    "message": "Other Bookmarks Folders",
+    "description": "The title for other bookmarks folders section"
+  },
+  "bookmarks_bar_title": {
+    "message": "Bookmarks Bar",
+    "description": "The title for bookmarks bar bookmarks section"
+  },
+  "no_bookmarks": {
+    "message": "No Bookmarks",
+    "description": "Text shown when there are no bookmarks"
+  },
+  "no_bookmarks_desc": {
+    "message": "No bookmarks in this category",
+    "description": "Description shown when there are no bookmarks"
+  },
+  "no_matching_bookmarks": {
+    "message": "No Matching Bookmarks",
+    "description": "Text shown when no bookmarks match search"
+  },
+  "no_matching_bookmarks_desc": {
+    "message": "No bookmarks found containing \"$1\"",
+    "description": "Description shown when no bookmarks match search, $1 is the search term"
+  },
+  "download": {
+    "message": "Downloads",
+    "description": "Text for downloads button tooltip"
+  },
+  "history": {
+    "message": "History",
+    "description": "Text for history button tooltip"
+  },
+  "bookmarks_manager": {
+    "message": "Bookmark Manager",
+    "description": "Text for bookmarks manager button tooltip"
+  },
+  "extensions": {
+    "message": "Extensions",
+    "description": "Text for extensions manager button tooltip"
+  },
+  "settings": {
+    "message": "Settings",
+    "description": "Text for settings button tooltip"
+  },
+  "copy_link": {
+    "message": "Copy Link",
+    "description": "Text for copy link action"
+  },
+  "open_new_tab": {
+    "message": "Open in New Tab",
+    "description": "Text for open in new tab action"
+  },
+  "pin": {
+    "message": "Pin to Top",
+    "description": "Text for pin bookmark action"
+  },
+  "unpin": {
+    "message": "Unpin from Top",
+    "description": "Text for unpin bookmark action"
+  },
+  "qrcode_share": {
+    "message": "Share QR Code",
+    "description": "Text for QR code share action"
+  },
+  "clear_search": {
+    "message": "Clear Search",
+    "description": "Text for clear search button tooltip"
+  },
+  "search_settings": {
+    "message": "Search Settings",
+    "description": "The title for search settings panel"
+  },
+  "about": {
+    "message": "About",
+    "description": "The title for about panel"
+  },
+  "search_engine_selection": {
+    "message": "Search Engine Selection",
+    "description": "The title for search engine selection"
+  },
+  "search_engine_desc": {
+    "message": "Choose your preferred search engine",
+    "description": "Description for search engine selection"
+  },
+  "google": {
+    "message": "Google",
+    "description": "Google search engine name"
+  },
+  "google_desc": {
+    "message": "The world's largest search engine",
+    "description": "Description for Google search engine"
+  },
+  "bing": {
+    "message": "Bing",
+    "description": "Bing search engine name"
+  },
+  "bing_desc": {
+    "message": "Microsoft's search engine",
+    "description": "Description for Bing search engine"
+  },
+  "baidu": {
+    "message": "Baidu",
+    "description": "Baidu search engine name"
+  },
+  "baidu_desc": {
+    "message": "Chinese search engine",
+    "description": "Description for Baidu search engine"
+  },
+  "app_name": {
+    "message": "MarkLauncher",
+    "description": "The application name"
+  },
+  "app_version": {
+    "message": "Version $1",
+    "description": "The application version"
+  },
+  "app_description": {
+    "message": "A simple and efficient Chrome bookmark launcher extension",
+    "description": "The application description"
+  },
+  "main_features": {
+    "message": "Main Features",
+    "description": "The main features title"
+  },
+  "feature1": {
+    "message": "Native Chrome bookmark structure display",
+    "description": "Feature 1 description"
+  },
+  "feature2": {
+    "message": "Smart search with multi-engine support",
+    "description": "Feature 2 description"
+  },
+  "feature3": {
+    "message": "Clean and modern interface design",
+    "description": "Feature 3 description"
+  },
+  "feature4": {
+    "message": "Keyboard shortcut support",
+    "description": "Feature 4 description"
+  },
+  "qrcode_title": {
+    "message": "QR Code Share",
+    "description": "The title for QR code sharing modal"
+  },
+  "use_phone_scan": {
+    "message": "📱 Scan the QR code above with your phone to quickly access this website",
+    "description": "Instruction text for QR code sharing"
+  },
+  "loading_text": {
+    "message": "Loading bookmarks...",
+    "description": "Text shown while loading bookmarks"
+  },
+  "error_title": {
+    "message": "Error",
+    "description": "The title for error message"
+  },
+  "chrome_api_error": {
+    "message": "Chrome API not available, please ensure running in Chrome browser",
+    "description": "Error message when Chrome API is not available"
+  },
+  "load_bookmarks_failed": {
+    "message": "Failed to load bookmarks",
+    "description": "Error message when loading bookmarks fails"
+  },
+  "link_copied": {
+    "message": "Link copied",
+    "description": "Success message when link is copied"
+  },
+  "link_copy_failed": {
+    "message": "Copy failed, please copy manually",
+    "description": "Error message when copy fails"
+  },
+  "settings_saved": {
+    "message": "Settings saved",
+    "description": "Success message when settings are saved"
+  },
+  "unnamed_folder": {
+    "message": "Unnamed Folder",
+    "description": "Default name for unnamed bookmark folders"
+  },
+  "theme_light": {
+    "message": "Light",
+    "description": "Light theme option"
+  },
+  "theme_light_desc": {
+    "message": "Bright and clean interface",
+    "description": "Light theme description"
+  },
+  "theme_dark": {
+    "message": "Dark",
+    "description": "Dark theme option"
+  },
+  "theme_dark_desc": {
+    "message": "Eye-friendly dark experience",
+    "description": "Dark theme description"
+  },
+  "theme_system": {
+    "message": "System",
+    "description": "System theme option"
+  },
+  "theme_system_desc": {
+    "message": "Follow your OS preference automatically",
+    "description": "System theme description"
+  },
+  "theme_button_title": {
+    "message": "Theme settings",
+    "description": "Tooltip for theme toggle button"
+  },
+  "toggle_navigation": {
+    "message": "Toggle navigation",
+    "description": "Tooltip for mobile navigation toggle"
+  },
+  "open_actions_menu": {
+    "message": "Open actions menu",
+    "description": "Tooltip for mobile actions dropdown"
+  },
+  "appearance": {
+    "message": "Appearance",
+    "description": "Appearance settings label"
+  },
+  "appearance_desc": {
+    "message": "Choose the visual style you prefer",
+    "description": "Appearance panel description"
+  }
+}
