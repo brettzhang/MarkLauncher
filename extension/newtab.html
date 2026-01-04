@@ -172,6 +172,9 @@
         <p data-i18n="loading_text">Loading bookmarks...</p>
     </div>
 
+    <!-- 通知容器 -->
+    <div id="notificationContainer" class="notification-container"></div>
+
     <!-- 设置弹窗 -->
     <div id="settingsModal" class="settings-modal">
         <div class="settings-overlay"></div>
@@ -296,6 +299,18 @@
                                 <h3 data-i18n="app_name">MarkLauncher</h3>
                                 <p class="app-version" data-i18n="app_version" data-i18n-skip="true">Version 1.0.0</p>
                                 <p class="app-description" data-i18n="app_description">A simple and efficient Chrome bookmark launcher extension</p>
+
+                                <!-- 同步状态指示器 -->
+                                <div class="sync-status-container">
+                                    <div class="sync-status-header">
+                                        <h4 data-i18n="sync_status">Sync Status</h4>
+                                        <div id="syncStatusIndicator" class="sync-status-indicator">
+                                            <span class="sync-status-icon">⋯</span>
+                                            <span class="sync-status-text" data-i18n="sync_checking">Checking...</span>
+                                        </div>
+                                    </div>
+                                    <p class="sync-status-description" id="syncStatusDescription"></p>
+                                </div>
 
                                 <div class="app-features">
                                     <h4 data-i18n="main_features">Main Features</h4>

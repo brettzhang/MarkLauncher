@@ -1915,3 +1915,218 @@ body {
 .search-mode-toggle-btn:focus-visible {
     outline: none;
 }
+
+/* ========== 通知系统样式 ========== */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.notification {
+    pointer-events: auto;
+    min-width: 300px;
+    max-width: 400px;
+    padding: 14px 18px;
+    border-radius: var(--border-radius);
+    background: var(--surface-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideInRight 0.3s ease-out;
+    border: 1px solid var(--border-color);
+}
+
+.notification.removing {
+    animation: slideOutRight 0.3s ease-in forwards;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+.notification-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-message {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.notification-close {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s;
+}
+
+.notification-close:hover {
+    background: var(--surface-tertiary);
+    color: var(--text-primary);
+}
+
+/* 通知类型样式 */
+.notification.success {
+    border-left: 3px solid var(--success-color);
+}
+
+.notification.success .notification-icon {
+    color: var(--success-color);
+}
+
+.notification.warning {
+    border-left: 3px solid var(--warning-color);
+}
+
+.notification.warning .notification-icon {
+    color: var(--warning-color);
+}
+
+.notification.error {
+    border-left: 3px solid var(--error-color);
+}
+
+.notification.error .notification-icon {
+    color: var(--error-color);
+}
+
+.notification.info {
+    border-left: 3px solid var(--primary-color);
+}
+
+.notification.info .notification-icon {
+    color: var(--primary-color);
+}
+
+/* ========== 同步状态指示器样式 ========== */
+.sync-status-container {
+    margin-top: 24px;
+    padding: 16px;
+    border-radius: var(--border-radius);
+    background: var(--surface-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.sync-status-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.sync-status-header h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.sync-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s;
+}
+
+.sync-status-indicator.sync-ok {
+    background: rgba(52, 199, 89, 0.10);
+    color: var(--success-color);
+}
+
+.sync-status-indicator.sync-ok .sync-status-icon {
+    color: var(--success-color);
+}
+
+.sync-status-indicator.sync-warning {
+    background: rgba(255, 149, 0, 0.10);
+    color: var(--warning-color);
+}
+
+.sync-status-indicator.sync-warning .sync-status-icon {
+    color: var(--warning-color);
+}
+
+.sync-status-indicator.sync-error {
+    background: rgba(255, 59, 48, 0.10);
+    color: var(--error-color);
+}
+
+.sync-status-indicator.sync-error .sync-status-icon {
+    color: var(--error-color);
+}
+
+.sync-status-icon {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sync-status-text {
+    font-size: 13px;
+}
+
+.sync-status-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}

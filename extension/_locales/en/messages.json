@@ -270,5 +270,41 @@
   "appearance_desc": {
     "message": "Choose the visual style you prefer",
     "description": "Appearance panel description"
+  },
+  "sync_status": {
+    "message": "Sync Status",
+    "description": "Sync status label"
+  },
+  "sync_checking": {
+    "message": "Checking...",
+    "description": "Sync status checking text"
+  },
+  "sync_enabled": {
+    "message": "Sync Enabled",
+    "description": "Sync enabled status"
+  },
+  "sync_disabled": {
+    "message": "Sync Disabled",
+    "description": "Sync disabled status"
+  },
+  "sync_checking_status": {
+    "message": "Checking sync service status...",
+    "description": "Checking sync status description"
+  },
+  "sync_enabled_desc": {
+    "message": "Pinned data will sync across devices. Make sure you're signed in to Chrome.",
+    "description": "Sync enabled description"
+  },
+  "sync_disabled_desc": {
+    "message": "Pinned data is saved locally only and won't sync across devices.",
+    "description": "Sync disabled description"
+  },
+  "sync_quota_error": {
+    "message": "Sync storage quota exceeded. Please contact support.",
+    "description": "Sync quota error message"
+  },
+  "sync_network_error": {
+    "message": "Sync failed: $1. Please check your network or sign in to Chrome.",
+    "description": "Sync network error message"
   }
 }

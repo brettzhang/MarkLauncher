@@ -39,7 +39,7 @@ class MarkLauncher {
         };
 
         // 置顶功能相关
-        this.pinnedBookmarks = []; // 存储置顶书签的ID列表
+        this.pinnedBookmarks = []; // 存储置顶书签的URL列表
         this.contextMenuTarget = null; // 右键菜单的目标书签项
         this.scrollAnimationFrame = null; // 记录当前滚动动画帧编号
 
@@ -103,6 +103,11 @@ class MarkLauncher {
             await this.loadBookmarks();
             this.bindEvents();
             this.render();
+
+            // 更新同步状态
+            setTimeout(() => {
+                this.updateSyncStatus();
+            }, 2000);
 
             // 初始化搜索栏提示词和按钮
             this.updateSearchPlaceholder();
@@ -966,7 +971,7 @@ class MarkLauncher {
      * 渲染单个书签项
      */
     renderBookmarkItem(bookmark) {
-        const isPinned = this.isBookmarkedPinned(bookmark.id);
+        const isPinned = this.isBookmarkedPinned(bookmark.url);
         const pinnedClass = isPinned ? ' pinned' : '';
         return `
             <div class="bookmark-item${pinnedClass}" data-url="${bookmark.url}" data-id="${bookmark.id}">
@@ -1533,6 +1538,143 @@ class MarkLauncher {
         }, duration);
     }
 
+    // ========== 通知系统 ==========
+
+    /**
+     * 显示通知消息
+     * @param {string} message - 通知消息
+     * @param {string} type - 通知类型: 'success', 'warning', 'error', 'info'
+     * @param {number} duration - 显示时长(毫秒)，0表示不自动关闭
+     */
+    showNotification(message, type = 'info', duration = 4000) {
+        const container = document.getElementById('notificationContainer');
+        if (!container) return;
+
+        // 创建通知元素
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+
+        // 图标
+        const iconMap = {
+            success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+            warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+            error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+            info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+        };
+
+        // 构建通知HTML
+        notification.innerHTML = `
+            <div class="notification-icon">${iconMap[type] || iconMap.info}</div>
+            <div class="notification-content">
+                <div class="notification-message">${this.escapeHtml(message)}</div>
+            </div>
+            <button class="notification-close">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        `;
+
+        // 添加到容器
+        container.appendChild(notification);
+
+        // 绑定关闭按钮事件
+        const closeBtn = notification.querySelector('.notification-close');
+        closeBtn.addEventListener('click', () => {
+            this.removeNotification(notification);
+        });
+
+        // 自动关闭
+        if (duration > 0) {
+            setTimeout(() => {
+                this.removeNotification(notification);
+            }, duration);
+        }
+    }
+
+    /**
+     * 移除通知
+     */
+    removeNotification(notification) {
+        if (!notification || !notification.parentNode) return;
+        notification.classList.add('removing');
+        notification.addEventListener('animationend', () => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        });
+    }
+
+    // ========== 同步状态检测 ==========
+
+    /**
+     * 检查Chrome同步是否可用
+     */
+    async checkSyncAvailable() {
+        return new Promise((resolve) => {
+            if (!chrome || !chrome.storage || !chrome.storage.sync) {
+                resolve({ available: false, error: 'Chrome Storage API 不可用' });
+                return;
+            }
+
+            // 尝试写入测试数据
+            chrome.storage.sync.set({ _sync_test: Date.now() }, () => {
+                if (chrome.runtime.lastError) {
+                    resolve({
+                        available: false,
+                        error: chrome.runtime.lastError.message || '同步服务不可用'
+                    });
+                } else {
+                    // 清理测试数据
+                    chrome.storage.sync.remove('_sync_test', () => {
+                        resolve({ available: true });
+                    });
+                }
+            });
+        });
+    }
+
+    /**
+     * 更新UI上的同步状态指示器
+     */
+    async updateSyncStatus() {
+        const indicator = document.getElementById('syncStatusIndicator');
+        const description = document.getElementById('syncStatusDescription');
+
+        if (!indicator || !description) return;
+
+        // 显示"检查中"状态
+        indicator.className = 'sync-status-indicator';
+        indicator.innerHTML = `<span class="sync-status-icon">⋯</span><span class="sync-status-text">${this.escapeHtml(chrome.i18n.getMessage('sync_checking'))}</span>`;
+        description.textContent = chrome.i18n.getMessage('sync_checking_status');
+
+        // 检查同步可用性
+        const result = await this.checkSyncAvailable();
+
+        if (result.available) {
+            // 同步可用
+            indicator.className = 'sync-status-indicator sync-ok';
+            indicator.innerHTML = `<span class="sync-status-icon">✓</span><span class="sync-status-text">${this.escapeHtml(chrome.i18n.getMessage('sync_enabled'))}</span>`;
+            description.textContent = chrome.i18n.getMessage('sync_enabled_desc');
+        } else {
+            // 同步不可用
+            indicator.className = 'sync-status-indicator sync-warning';
+            indicator.innerHTML = `<span class="sync-status-icon">!</span><span class="sync-status-text">${this.escapeHtml(chrome.i18n.getMessage('sync_disabled'))}</span>`;
+
+            // 根据错误信息显示不同的提示
+            let desc = chrome.i18n.getMessage('sync_disabled_desc');
+            if (result.error) {
+                if (result.error.includes('QUOTA') || result.error.includes('quota')) {
+                    desc = chrome.i18n.getMessage('sync_quota_error');
+                } else {
+                    desc = chrome.i18n.getMessage('sync_network_error').replace('$1', result.error);
+                }
+            }
+            description.textContent = desc;
+        }
+    }
+
     // ========== 置顶功能相关方法 ==========
 
     /**
@@ -1540,32 +1682,28 @@ class MarkLauncher {
      */
     async loadPinnedBookmarks() {
         return new Promise((resolve) => {
-            try {
-                if (chrome && chrome.storage && chrome.storage.sync) {
-                    chrome.storage.sync.get(['marklauncher_pinned_bookmarks'], (result) => {
-                        if (chrome.runtime.lastError) {
-                            console.error('Chrome Storage 错误:', chrome.runtime.lastError);
-                            // 回退到localStorage
-                            this.loadPinnedBookmarksFromLocalStorage();
-                            resolve();
-                        } else {
-                            if (result.marklauncher_pinned_bookmarks) {
-                                this.pinnedBookmarks = result.marklauncher_pinned_bookmarks;
-                            }
-                            resolve();
-                        }
-                    });
-                } else {
-                    // 如果Chrome Storage不可用，使用localStorage
-                    this.loadPinnedBookmarksFromLocalStorage();
-                    resolve();
-                }
-            } catch (error) {
-                console.error('加载置顶书签失败:', error);
-                // 回退到localStorage
-                this.loadPinnedBookmarksFromLocalStorage();
+            if (!chrome || !chrome.storage || !chrome.storage.sync) {
+                console.error('Chrome Storage API 不可用');
+                // 显示警告通知
+                setTimeout(() => {
+                    this.showNotification('置顶数据无法加载：Chrome 同步功能不可用', 'warning');
+                }, 1000);
                 resolve();
+                return;
             }
+
+            chrome.storage.sync.get(['marklauncher_pinned_bookmarks'], (result) => {
+                if (chrome.runtime.lastError) {
+                    console.error('加载置顶书签失败:', chrome.runtime.lastError);
+                    // 显示错误通知
+                    setTimeout(() => {
+                        this.showNotification('置顶数据加载失败：' + chrome.runtime.lastError.message, 'error');
+                    }, 1000);
+                } else if (result.marklauncher_pinned_bookmarks) {
+                    this.pinnedBookmarks = result.marklauncher_pinned_bookmarks;
+                }
+                resolve();
+            });
         });
     }
 
@@ -1589,27 +1727,32 @@ class MarkLauncher {
      */
     async savePinnedBookmarks() {
         return new Promise((resolve) => {
-            try {
-                if (chrome && chrome.storage && chrome.storage.sync) {
-                    chrome.storage.sync.set({ marklauncher_pinned_bookmarks: this.pinnedBookmarks }, () => {
-                        if (chrome.runtime.lastError) {
-                            console.error('保存置顶书签失败:', chrome.runtime.lastError);
-                            // 回退到localStorage
-                            this.savePinnedBookmarksToLocalStorage();
-                        }
-                        resolve();
-                    });
-                } else {
-                    // 如果Chrome Storage不可用，使用localStorage
-                    this.savePinnedBookmarksToLocalStorage();
-                    resolve();
-                }
-            } catch (error) {
-                console.error('保存置顶书签失败:', error);
-                // 回退到localStorage
-                this.savePinnedBookmarksToLocalStorage();
+            if (!chrome || !chrome.storage || !chrome.storage.sync) {
+                console.error('Chrome Storage API 不可用');
+                this.showNotification('置顶数据无法保存：Chrome 同步功能不可用', 'error');
                 resolve();
+                return;
             }
+
+            chrome.storage.sync.set({ marklauncher_pinned_bookmarks: this.pinnedBookmarks }, () => {
+                if (chrome.runtime.lastError) {
+                    console.error('保存置顶书签失败:', chrome.runtime.lastError);
+                    // 显示错误通知，但不自动降级到localStorage
+                    let errorMsg = '置顶数据同步失败';
+                    if (chrome.runtime.lastError.message) {
+                        if (chrome.runtime.lastError.message.includes('QUOTA')) {
+                            errorMsg = '同步存储空间不足';
+                        } else {
+                            errorMsg = '置顶数据同步失败：' + chrome.runtime.lastError.message;
+                        }
+                    }
+                    this.showNotification(errorMsg + '，请检查网络连接或登录 Chrome 账户', 'warning');
+                } else {
+                    // 保存成功，显示成功提示
+                    // this.showNotification('置顶数据已同步', 'success', 2000);
+                }
+                resolve();
+            });
         });
     }
 
@@ -1626,34 +1769,54 @@ class MarkLauncher {
 
     /**
      * 置顶书签
+     * @param {string} bookmarkUrl - 书签URL
      */
-    async pinBookmark(bookmarkId) {
-        if (!this.pinnedBookmarks.includes(bookmarkId)) {
-            this.pinnedBookmarks.push(bookmarkId);
+    async pinBookmark(bookmarkUrl) {
+        if (!this.pinnedBookmarks.includes(bookmarkUrl)) {
+            this.pinnedBookmarks.push(bookmarkUrl);
             await this.savePinnedBookmarks();
             this.renderPinnedSection();
-            this.refreshBookmarkItem(bookmarkId);
+            // 通过URL找到对应的书签ID并刷新
+            const bookmark = this.getBookmarkByUrl(bookmarkUrl);
+            if (bookmark) {
+                this.refreshBookmarkItem(bookmark.id);
+            }
         }
     }
 
     /**
      * 取消置顶书签
+     * @param {string} bookmarkUrl - 书签URL
      */
-    async unpinBookmark(bookmarkId) {
-        const index = this.pinnedBookmarks.indexOf(bookmarkId);
+    async unpinBookmark(bookmarkUrl) {
+        const index = this.pinnedBookmarks.indexOf(bookmarkUrl);
         if (index > -1) {
             this.pinnedBookmarks.splice(index, 1);
             await this.savePinnedBookmarks();
             this.renderPinnedSection();
-            this.refreshBookmarkItem(bookmarkId);
+            // 通过URL找到对应的书签ID并刷新
+            const bookmark = this.getBookmarkByUrl(bookmarkUrl);
+            if (bookmark) {
+                this.refreshBookmarkItem(bookmark.id);
+            }
         }
     }
 
     /**
      * 检查书签是否已置顶
+     * @param {string} bookmarkUrl - 书签URL
      */
-    isBookmarkedPinned(bookmarkId) {
-        return this.pinnedBookmarks.includes(bookmarkId);
+    isBookmarkedPinned(bookmarkUrl) {
+        return this.pinnedBookmarks.includes(bookmarkUrl);
+    }
+
+    /**
+     * 通过URL获取书签
+     * @param {string} url - 书签URL
+     */
+    getBookmarkByUrl(url) {
+        const allBookmarks = this.getAllBookmarks();
+        return allBookmarks.find(bookmark => bookmark.url === url) || null;
     }
 
     /**
@@ -1662,7 +1825,7 @@ class MarkLauncher {
     getPinnedBookmarksData() {
         const allBookmarks = this.getAllBookmarks();
         return this.pinnedBookmarks
-            .map(id => allBookmarks.find(bookmark => bookmark.id === id))
+            .map(url => allBookmarks.find(bookmark => bookmark.url === url))
             .filter(bookmark => bookmark !== undefined); // 过滤掉可能已删除的书签
     }
 
@@ -1741,8 +1904,8 @@ class MarkLauncher {
         const unpinAction = contextMenu.querySelector('[data-action="unpin"]');
 
         this.contextMenuTarget = bookmarkItem;
-        const bookmarkId = bookmarkItem.dataset.id;
-        const isPinned = this.isBookmarkedPinned(bookmarkId);
+        const bookmarkUrl = bookmarkItem.dataset.url;
+        const isPinned = this.isBookmarkedPinned(bookmarkUrl);
 
         // 根据置顶状态显示/隐藏对应选项
         pinAction.style.display = isPinned ? 'none' : 'flex';
@@ -1806,16 +1969,15 @@ class MarkLauncher {
     handleContextMenuClick(action) {
         if (!this.contextMenuTarget) return;
 
-        const bookmarkId = this.contextMenuTarget.dataset.id;
         const bookmarkUrl = this.contextMenuTarget.dataset.url;
         const bookmarkTitle = this.contextMenuTarget.querySelector('.bookmark-title')?.textContent || '未知网站';
 
         switch (action) {
             case 'pin':
-                this.pinBookmark(bookmarkId);
+                this.pinBookmark(bookmarkUrl);
                 break;
             case 'unpin':
-                this.unpinBookmark(bookmarkId);
+                this.unpinBookmark(bookmarkUrl);
                 break;
             case 'qrcode':
                 this.showQRCodeModal(bookmarkUrl, bookmarkTitle);

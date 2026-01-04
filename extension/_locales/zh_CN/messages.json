@@ -270,5 +270,41 @@
   "appearance_desc": {
     "message": "选择偏好的配色模式",
     "description": "Appearance panel description"
+  },
+  "sync_status": {
+    "message": "同步状态",
+    "description": "Sync status label"
+  },
+  "sync_checking": {
+    "message": "检查中...",
+    "description": "Sync status checking text"
+  },
+  "sync_enabled": {
+    "message": "同步已启用",
+    "description": "Sync enabled status"
+  },
+  "sync_disabled": {
+    "message": "同步未启用",
+    "description": "Sync disabled status"
+  },
+  "sync_checking_status": {
+    "message": "正在检测同步服务状态...",
+    "description": "Checking sync status description"
+  },
+  "sync_enabled_desc": {
+    "message": "置顶数据将跨设备同步。请确保已登录 Chrome 账户。",
+    "description": "Sync enabled description"
+  },
+  "sync_disabled_desc": {
+    "message": "置顶数据仅保存在本地，无法跨设备同步。",
+    "description": "Sync disabled description"
+  },
+  "sync_quota_error": {
+    "message": "同步存储空间不足，请联系支持。",
+    "description": "Sync quota error message"
+  },
+  "sync_network_error": {
+    "message": "无法同步: $1。请检查网络连接或登录 Chrome 账户。",
+    "description": "Sync network error message"
   }
 }
