@@ -9,11 +9,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **核心特性：**
 - 左侧文件夹导航（Chrome 书签栏/其他书签），支持折叠/展开
 - 双模式搜索（书签搜索 + 网络搜索），Tab键切换模式
+- 网络搜索使用浏览器默认搜索引擎（Chrome Search API）
 - 响应式 Material Design 界面，支持深色主题
-- 键盘快捷键支持（Ctrl+K 聚焦搜索）
-- 二维码生成功能
+- 键盘快捷键支持（Ctrl+K 聚焦搜索，ESC 关闭弹窗）
+- 二维码生成功能（简化界面）
 - 国际化支持（中英文）
-- 完整的设置系统（搜索引擎选择、主题切换）
+- 设置系统（主题切换）
 - **智能卡片背景色**：自动从书签图标提取主色调并设置为卡片背景色（5%透明度）
 
 ## 技术架构
@@ -22,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **平台**: Chrome Extension Manifest V3
 - **语言**: 原生 JavaScript (ES6+)
 - **样式**: CSS3 (Grid + Flexbox) + CSS 变量系统
-- **API**: Chrome Extension APIs (bookmarks, storage, tabs)
+- **API**: Chrome Extension APIs (bookmarks, storage, search, favicon)
 - **架构**: 单页面应用，事件驱动模型
 
 ### 代码结构
@@ -30,8 +31,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 扩展核心文件（extension/ 目录）：
 ├── manifest.json          # Chrome Extension V3 配置文件
 ├── newtab.html           # 主页面（三栏布局）
-├── newtab.js             # MarkLauncher 主类（82KB+）
-├── styles.css            # 样式文件（38KB+）
+├── newtab.js             # MarkLauncher 主类
+├── styles.css            # 样式文件
 ├── background.js         # 后台服务工作者
 ├── qrcode.min.js         # 二维码生成库
 └── _locales/             # 国际化文件
@@ -67,11 +68,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 发布流程
 ```bash
 # 创建并推送版本 tag（自动触发 GitHub Actions 发布）
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.0.5
+git push origin v1.0.5
 
 # Workflow 会自动：
-# 1. 打包 extension/ 目录为 marklauncher-v1.0.0.zip
+# 1. 打包 extension/ 目录为 marklauncher-v1.0.5.zip
 # 2. 创建 GitHub Release
 # 3. 上传 zip 文件到 Release
 ```
@@ -90,9 +91,15 @@ git push origin v1.0.0
 ### 2. 原生 JavaScript 实现
 - **优势**: 性能优异，无外部依赖，快速加载
 - **模式**: ES6+ 类语法，模块化方法组织
-- **兼容性**: Chrome 88+ 支持
+- **兼容性**: Chrome 87+ 支持（需要 Chrome Search API）
 
-### 3. 智能配色系统（newtab.js:1063-1180）
+### 3. Chrome Search API 集成
+- **使用场景**: 网络搜索功能
+- **API 方法**: `chrome.search.query({ text, disposition })`
+- **优势**: 自动使用浏览器默认搜索引擎，无需用户配置
+- **权限**: 需要 `search` 权限
+
+### 4. 智能配色系统（newtab.js）
 使用 Canvas API 提取书签图标主色调：
 - 创建 32x32 Canvas 绘制图标
 - 统计像素颜色频率（采样步长4）
@@ -102,7 +109,7 @@ git push origin v1.0.0
 - 处理 CORS 错误和加载失败
 - 在 `bindBookmarkItemEvents()` 中自动触发
 
-### 4. CSS 变量主题系统
+### 5. CSS 变量主题系统
 ```css
 :root {
     --primary-color: #007AFF;
@@ -117,12 +124,13 @@ git push origin v1.0.0
 }
 ```
 
-### 5. 权限最小化
+### 6. 权限最小化
 - `bookmarks`: 读取书签数据
-- `storage`: 保存用户设置
-- `tabs`: 创建新标签页
+- `storage`: 保存用户设置和置顶书签
+- `search`: 网络搜索功能（Chrome Search API）
+- `favicon`: 获取网站图标
 
-### 6. 扩展目录分离
+### 7. 扩展目录分离
 - 所有扩展文件在 `extension/` 目录
 - 便于自动化打包和发布
 - 清晰的项目结构
@@ -136,8 +144,8 @@ git push origin v1.0.0
 
 ### 搜索功能
 - **双模式**: 书签搜索 + 网络搜索
-- **搜索引擎**: 支持 Google/Bing/百度（可配置）
-- **快捷键**: Ctrl+K 聚焦，Tab 切换模式
+- **搜索引擎**: 使用浏览器默认搜索引擎（Chrome Search API）
+- **快捷键**: Ctrl+K 聚焦，Tab 切换模式，ESC 关闭弹窗
 - **实时过滤**: 支持标题、URL、文件夹搜索
 
 ### 侧边栏功能
@@ -148,7 +156,8 @@ git push origin v1.0.0
 ### 二维码功能
 - **右键菜单**: 上下文菜单生成二维码
 - **本地生成**: qrcode-generator 库
-- **下载功能**: 支持二维码图片下载
+- **简化界面**: 只显示标题、二维码和复制链接按钮
+- **ESC 关闭**: 支持键盘快捷键关闭
 
 ### 智能卡片背景色
 - **自动提取**: 图标加载完成后自动分析颜色
@@ -170,8 +179,17 @@ git push origin v1.0.0
 
 ### 设置存储
 - **Chrome Storage**: `chrome.storage.sync`
-- **数据同步**: 跨设备设置同步
-- **配置项**: 搜索引擎选择、主题设置、语言设置
+- **数据同步**: 跨设备设置同步（置顶书签、主题设置）
+- **配置项**: 主题设置
+
+### 键盘快捷键
+- **Ctrl+K**: 聚焦搜索框
+- **Tab**: 切换搜索模式（书签/网络）
+- **Enter**: 执行网络搜索
+- **Escape**:
+  - 关闭设置弹窗
+  - 关闭二维码弹窗
+  - 清除搜索（当没有弹窗打开时）
 
 ## 关键文件说明
 
@@ -179,6 +197,7 @@ git push origin v1.0.0
 - Chrome Extension V3 配置
 - 定义权限和入口点
 - 设置新标签页覆盖
+- 当前版本: 1.0.5
 
 ### newtab.js (MarkLauncher 类)
 **重要方法**：
@@ -189,10 +208,11 @@ git push origin v1.0.0
 - `applyFaviconColorToCard()`: 应用图标颜色到卡片背景
 - `extractAndApplyColor()`: 提取主色调并应用（包含颜色统计算法）
 - `searchBookmarks()`: 搜索功能
-- `performWebSearch()`: 网络搜索
+- `performWebSearch()`: 网络搜索（使用 Chrome Search API）
 - `loadSettings()` / `saveSettings()`: 设置管理
 - `showQRCodeModal()` / `generateQRCode()`: 二维码功能
 - `applyTheme()` / `toggleTheme()`: 主题功能
+- `bindEvents()`: 绑定全局事件监听器（包括 ESC 键处理）
 
 ### styles.css
 **配色变量**（浅色主题）：
@@ -210,8 +230,9 @@ git push origin v1.0.0
 
 **特殊样式**：
 - `.bookmark-item`: 卡片背景色使用内联 `--favicon-color` 变量
-- `.empty-state`: 与有数据时宽度一致 (`width: min(100%, var(--content-max-width))`)
+- `.empty-state`: 与有数据时宽度一致
 - 左侧导航激活状态使用低调灰色，非蓝色
+- 设置面板添加 `overflow-x: hidden` 防止水平滚动条
 
 ## 常见开发任务
 
@@ -226,6 +247,7 @@ git push origin v1.0.0
 - 响应式设计考虑移动端适配
 - 遵循 iOS/macOS 风格视觉规范
 - 注意深色/浅色主题同时调整
+- 确保容器不会出现水平滚动条（添加 `overflow-x: hidden`）
 
 ### 调试技巧
 - 使用 Chrome DevTools 断点调试
@@ -242,6 +264,14 @@ git push origin v1.0.0
 5. GitHub Actions 自动创建 Release 并上传 zip
 
 ## 浏览器兼容性
-- Chrome 88+ ✅
-- Edge 88+ (Chromium) ✅
+- Chrome 87+ ✅（需要 Chrome Search API）
+- Edge 87+ (Chromium) ✅
 - 不支持 Firefox/Safari（不同扩展 API）
+
+## 版本历史
+- **v1.0.5**:
+  - 使用 Chrome Search API 实现网络搜索（移除搜索引擎配置）
+  - 移除同步状态显示
+  - 添加 ESC 键关闭弹窗功能
+  - 简化二维码弹窗界面
+  - 修复设置面板滚动条问题
