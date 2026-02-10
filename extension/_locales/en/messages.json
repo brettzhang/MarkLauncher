@@ -27,17 +27,9 @@
     "message": "Search bookmarks...",
     "description": "Placeholder text for bookmark search input"
   },
-  "search_on_google": {
-    "message": "Search on Google...",
-    "description": "Placeholder text for Google search"
-  },
-  "search_on_bing": {
-    "message": "Search on Bing...",
-    "description": "Placeholder text for Bing search"
-  },
-  "search_on_baidu": {
-    "message": "Search on Baidu...",
-    "description": "Placeholder text for Baidu search"
+  "search_web": {
+    "message": "Search web...",
+    "description": "Placeholder text for web search"
   },
   "search_results_title": {
     "message": "Search Results",
@@ -115,45 +107,9 @@
     "message": "Clear Search",
     "description": "Text for clear search button tooltip"
   },
-  "search_settings": {
-    "message": "Search Settings",
-    "description": "The title for search settings panel"
-  },
   "about": {
     "message": "About",
     "description": "The title for about panel"
-  },
-  "search_engine_selection": {
-    "message": "Search Engine Selection",
-    "description": "The title for search engine selection"
-  },
-  "search_engine_desc": {
-    "message": "Choose your preferred search engine",
-    "description": "Description for search engine selection"
-  },
-  "google": {
-    "message": "Google",
-    "description": "Google search engine name"
-  },
-  "google_desc": {
-    "message": "The world's largest search engine",
-    "description": "Description for Google search engine"
-  },
-  "bing": {
-    "message": "Bing",
-    "description": "Bing search engine name"
-  },
-  "bing_desc": {
-    "message": "Microsoft's search engine",
-    "description": "Description for Bing search engine"
-  },
-  "baidu": {
-    "message": "Baidu",
-    "description": "Baidu search engine name"
-  },
-  "baidu_desc": {
-    "message": "Chinese search engine",
-    "description": "Description for Baidu search engine"
   },
   "app_name": {
     "message": "MarkLauncher",

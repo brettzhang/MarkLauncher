@@ -34,7 +34,6 @@ class MarkLauncher {
 
         // 设置相关
         this.settings = {
-            searchEngine: 'google', // 'google', 'bing', 'baidu'
             theme: 'system'
         };
 
@@ -42,13 +41,6 @@ class MarkLauncher {
         this.pinnedBookmarks = []; // 存储置顶书签的URL列表
         this.contextMenuTarget = null; // 右键菜单的目标书签项
         this.scrollAnimationFrame = null; // 记录当前滚动动画帧编号
-
-        // 搜索引擎URL映射
-        this.searchEngineUrls = {
-            google: 'https://www.google.com/search?q=',
-            bing: 'https://www.bing.com/search?q=',
-            baidu: 'https://www.baidu.com/s?wd='
-        };
 
         this.themeMediaQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
@@ -103,11 +95,6 @@ class MarkLauncher {
             await this.loadBookmarks();
             this.bindEvents();
             this.render();
-
-            // 更新同步状态
-            setTimeout(() => {
-                this.updateSyncStatus();
-            }, 2000);
 
             // 初始化搜索栏提示词和按钮
             this.updateSearchPlaceholder();
@@ -295,7 +282,7 @@ class MarkLauncher {
         // 键盘事件处理
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && this.searchTerm && this.searchMode === 'web') {
-                this.performGoogleSearch();
+                this.performWebSearch();
             }
         });
 
@@ -352,8 +339,24 @@ class MarkLauncher {
                 searchInput.focus();
             }
 
-            // Escape 清除搜索
+            // Escape 清除搜索或关闭设置弹窗
             if (e.key === 'Escape') {
+                const settingsModal = document.getElementById('settingsModal');
+                const qrcodeModal = document.getElementById('qrcodeModal');
+
+                // 优先关闭设置弹窗
+                if (settingsModal && settingsModal.classList.contains('show')) {
+                    this.closeSettingsModal();
+                    return;
+                }
+
+                // 其次关闭二维码弹窗
+                if (qrcodeModal && qrcodeModal.classList.contains('show')) {
+                    this.hideQRCodeModal();
+                    return;
+                }
+
+                // 最后清除搜索
                 searchInput.blur();
                 if (this.searchTerm) {
                     this.clearSearch();
@@ -692,12 +695,18 @@ class MarkLauncher {
     }
 
     /**
-     * 执行搜索引擎搜索
+     * 执行网络搜索（使用 Chrome Search API）
      */
-    performGoogleSearch() {
-        if (this.searchTerm) {
-            const searchUrl = this.searchEngineUrls[this.settings.searchEngine];
-            window.open(`${searchUrl}${encodeURIComponent(this.searchTerm)}`, '_blank');
+    performWebSearch() {
+        if (this.searchTerm && chrome.search) {
+            chrome.search.query({
+                text: this.searchTerm,
+                disposition: 'NEW_TAB'
+            }).catch(error => {
+                console.error('搜索失败:', error);
+                // 降级方案：使用浏览器的默认搜索引擎
+                this.showNotification('搜索功能不可用', 'warning');
+            });
         }
     }
 
@@ -1328,12 +1337,6 @@ class MarkLauncher {
         const modal = document.getElementById('settingsModal');
         modal.classList.add('show');
 
-        // 设置当前选中的搜索引擎
-        const searchEngineRadio = document.querySelector(`input[name="searchEngine"][value="${this.settings.searchEngine}"]`);
-        if (searchEngineRadio) {
-            searchEngineRadio.checked = true;
-        }
-
         const themeRadio = document.querySelector(`input[name="themePreference"][value="${this.settings.theme}"]`);
         if (themeRadio) {
             themeRadio.checked = true;
@@ -1375,18 +1378,6 @@ class MarkLauncher {
             };
         });
 
-        // 搜索引擎选择
-        const searchEngineRadios = document.querySelectorAll('input[name="searchEngine"]');
-        searchEngineRadios.forEach(radio => {
-            radio.onchange = (e) => {
-                if (e.target.checked) {
-                    this.settings.searchEngine = e.target.value;
-                    this.saveSettings();
-                    this.updateSearchPlaceholder();
-                }
-            };
-        });
-
         // 主题选择
         const themeRadios = document.querySelectorAll('input[name="themePreference"]');
         themeRadios.forEach(radio => {
@@ -1414,9 +1405,7 @@ class MarkLauncher {
             panel.classList.remove('active');
         });
 
-        if (panelName === 'search') {
-            document.getElementById('searchPanel').classList.add('active');
-        } else if (panelName === 'appearance') {
+        if (panelName === 'appearance') {
             document.getElementById('appearancePanel').classList.add('active');
         } else if (panelName === 'about') {
             document.getElementById('aboutPanel').classList.add('active');
@@ -1434,9 +1423,8 @@ class MarkLauncher {
         if (this.searchMode === 'bookmark') {
             searchInput.placeholder = t('search_bookmarks');
         } else {
-            // 获取搜索引擎的翻译名称
-            const engineKey = 'search_on_' + this.settings.searchEngine;
-            searchInput.placeholder = t(engineKey);
+            // 使用浏览器默认搜索引擎
+            searchInput.placeholder = t('search_web');
         }
     }
 
@@ -1604,75 +1592,6 @@ class MarkLauncher {
                 notification.parentNode.removeChild(notification);
             }
         });
-    }
-
-    // ========== 同步状态检测 ==========
-
-    /**
-     * 检查Chrome同步是否可用
-     */
-    async checkSyncAvailable() {
-        return new Promise((resolve) => {
-            if (!chrome || !chrome.storage || !chrome.storage.sync) {
-                resolve({ available: false, error: 'Chrome Storage API 不可用' });
-                return;
-            }
-
-            // 尝试写入测试数据
-            chrome.storage.sync.set({ _sync_test: Date.now() }, () => {
-                if (chrome.runtime.lastError) {
-                    resolve({
-                        available: false,
-                        error: chrome.runtime.lastError.message || '同步服务不可用'
-                    });
-                } else {
-                    // 清理测试数据
-                    chrome.storage.sync.remove('_sync_test', () => {
-                        resolve({ available: true });
-                    });
-                }
-            });
-        });
-    }
-
-    /**
-     * 更新UI上的同步状态指示器
-     */
-    async updateSyncStatus() {
-        const indicator = document.getElementById('syncStatusIndicator');
-        const description = document.getElementById('syncStatusDescription');
-
-        if (!indicator || !description) return;
-
-        // 显示"检查中"状态
-        indicator.className = 'sync-status-indicator';
-        indicator.innerHTML = `<span class="sync-status-icon">⋯</span><span class="sync-status-text">${this.escapeHtml(chrome.i18n.getMessage('sync_checking'))}</span>`;
-        description.textContent = chrome.i18n.getMessage('sync_checking_status');
-
-        // 检查同步可用性
-        const result = await this.checkSyncAvailable();
-
-        if (result.available) {
-            // 同步可用
-            indicator.className = 'sync-status-indicator sync-ok';
-            indicator.innerHTML = `<span class="sync-status-icon">✓</span><span class="sync-status-text">${this.escapeHtml(chrome.i18n.getMessage('sync_enabled'))}</span>`;
-            description.textContent = chrome.i18n.getMessage('sync_enabled_desc');
-        } else {
-            // 同步不可用
-            indicator.className = 'sync-status-indicator sync-warning';
-            indicator.innerHTML = `<span class="sync-status-icon">!</span><span class="sync-status-text">${this.escapeHtml(chrome.i18n.getMessage('sync_disabled'))}</span>`;
-
-            // 根据错误信息显示不同的提示
-            let desc = chrome.i18n.getMessage('sync_disabled_desc');
-            if (result.error) {
-                if (result.error.includes('QUOTA') || result.error.includes('quota')) {
-                    desc = chrome.i18n.getMessage('sync_quota_error');
-                } else {
-                    desc = chrome.i18n.getMessage('sync_network_error').replace('$1', result.error);
-                }
-            }
-            description.textContent = desc;
-        }
     }
 
     // ========== 置顶功能相关方法 ==========
@@ -1996,19 +1915,9 @@ class MarkLauncher {
         const modal = document.getElementById('qrcodeModal');
         const qrcodeCanvas = document.getElementById('qrcodeCanvas');
         const titleElement = document.getElementById('qrcodeTitle');
-        const urlElement = document.getElementById('qrcodeUrl');
-        const faviconElement = document.getElementById('qrcodeFavicon').querySelector('img');
 
-        // 设置网站信息
+        // 设置网站标题
         titleElement.textContent = title;
-        urlElement.textContent = url;
-
-        // 设置网站图标
-        const faviconUrl = this.getFaviconUrl(url);
-        faviconElement.src = faviconUrl;
-        faviconElement.alt = title;
-        // Chrome favicon API 不需要错误处理，因为Chrome会自动处理
-        // 删除了 onerror 处理器
 
         // 清空之前的二维码
         qrcodeCanvas.innerHTML = '';
@@ -2158,15 +2067,7 @@ class MarkLauncher {
             this.copyToClipboard(url);
         };
 
-        // ESC键关闭（确保只绑定一次）
-        const handleEscape = (e) => {
-            if (e.key === 'Escape') {
-                this.hideQRCodeModal();
-                document.removeEventListener('keydown', handleEscape);
-            }
-        };
-        document.removeEventListener('keydown', handleEscape); // 先移除
-        document.addEventListener('keydown', handleEscape);
+        // ESC 键关闭已由全局键盘事件处理
     }
 
     /**
@@ -2364,9 +2265,7 @@ class MarkLauncher {
                 'all_bookmarks': '全部书签',
                 'pinned': '置顶',
                 'search_bookmarks': '搜索书签...',
-                'search_on_google': '在 Google 中搜索...',
-                'search_on_bing': '在 Bing 中搜索...',
-                'search_on_baidu': '在百度中搜索...',
+                'search_web': '网络搜索...',
                 'no_bookmarks': '暂无书签',
                 'unnamed_folder': '未命名文件夹',
                 'appearance': '外观',
@@ -2384,9 +2283,7 @@ class MarkLauncher {
                 'all_bookmarks': 'All Bookmarks',
                 'pinned': 'Pinned',
                 'search_bookmarks': 'Search bookmarks...',
-                'search_on_google': 'Search on Google...',
-                'search_on_bing': 'Search on Bing...',
-                'search_on_baidu': 'Search on Baidu...',
+                'search_web': 'Search web...',
                 'no_bookmarks': 'No Bookmarks',
                 'unnamed_folder': 'Unnamed Folder',
                 'appearance': 'Appearance',

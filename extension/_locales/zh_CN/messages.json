@@ -27,17 +27,9 @@
     "message": "搜索书签...",
     "description": "Placeholder text for bookmark search input"
   },
-  "search_on_google": {
-    "message": "在 Google 中搜索...",
-    "description": "Placeholder text for Google search"
-  },
-  "search_on_bing": {
-    "message": "在 Bing 中搜索...",
-    "description": "Placeholder text for Bing search"
-  },
-  "search_on_baidu": {
-    "message": "在百度中搜索...",
-    "description": "Placeholder text for Baidu search"
+  "search_web": {
+    "message": "网络搜索...",
+    "description": "Placeholder text for web search"
   },
   "search_results_title": {
     "message": "搜索结果",
@@ -115,45 +107,9 @@
     "message": "清除搜索",
     "description": "Text for clear search button tooltip"
   },
-  "search_settings": {
-    "message": "搜索设置",
-    "description": "The title for search settings panel"
-  },
   "about": {
     "message": "关于",
     "description": "The title for about panel"
-  },
-  "search_engine_selection": {
-    "message": "搜索引擎选择",
-    "description": "The title for search engine selection"
-  },
-  "search_engine_desc": {
-    "message": "选择您偏好的搜索引擎",
-    "description": "Description for search engine selection"
-  },
-  "google": {
-    "message": "Google",
-    "description": "Google search engine name"
-  },
-  "google_desc": {
-    "message": "全球最大的搜索引擎",
-    "description": "Description for Google search engine"
-  },
-  "bing": {
-    "message": "Bing",
-    "description": "Bing search engine name"
-  },
-  "bing_desc": {
-    "message": "微软公司的搜索引擎",
-    "description": "Description for Bing search engine"
-  },
-  "baidu": {
-    "message": "百度",
-    "description": "Baidu search engine name"
-  },
-  "baidu_desc": {
-    "message": "中文搜索引擎",
-    "description": "Description for Baidu search engine"
   },
   "app_name": {
     "message": "MarkLauncher",
