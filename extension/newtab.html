@@ -276,6 +276,18 @@
 
     <!-- 右键菜单 -->
     <div id="contextMenu" class="context-menu" style="display: none;">
+        <div class="context-menu-item" data-action="open_new_tab">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+            </svg>
+            <span data-i18n="open_new_tab">Open in New Tab</span>
+        </div>
+        <div class="context-menu-item" data-action="copy_link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+            </svg>
+            <span data-i18n="copy_link">Copy Link</span>
+        </div>
         <div class="context-menu-item" data-action="pin">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -288,7 +300,6 @@
             </svg>
             <span data-i18n="unpin">Unpin from Top</span>
         </div>
-        <div class="context-menu-divider"></div>
         <div class="context-menu-item" data-action="qrcode">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/>

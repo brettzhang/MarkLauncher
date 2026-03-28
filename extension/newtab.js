@@ -726,8 +726,13 @@ class MarkLauncher {
             activeItem.classList.add('active');
         }
 
-        // 滚动到对应的分组
-        this.scrollToSection(folderId);
+        this.renderBookmarkContent();
+
+        const container = document.querySelector('.bookmark-content');
+        if (container) {
+            this.smoothScroll(container, 0, 160);
+        }
+
         this.updateMobileBreadcrumb();
         this.closeMobileNavigationPanel();
     }
@@ -814,10 +819,11 @@ class MarkLauncher {
     renderNavigation() {
         const navigation = document.getElementById('folderNavigation');
         const data = this.getCurrentData();
+        const isAllActive = !this.currentFolderId || this.currentFolderId === 'root';
 
         // 添加"全部"导航项
         let html = `
-            <li class="folder-nav-item ${!this.currentFolderId ? 'active' : ''}" data-folder-id="root">
+            <li class="folder-nav-item ${isAllActive ? 'active' : ''}" data-folder-id="root">
                 <div class="nav-item-content">
                     <svg class="nav-folder-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
@@ -893,28 +899,8 @@ class MarkLauncher {
                 }];
             }
         } else {
-            // 正常显示模式
-            // 先检查顶级书签
-            if (data.bookmarks.length > 0) {
-                sections.push({
-                    id: 'root',
-                    title: t('bookmarks_bar_title'),
-                    bookmarks: data.bookmarks
-                });
-                hasContent = true;
-            }
-
-            // 然后检查文件夹书签
-            data.folders.forEach(folder => {
-                if (folder.bookmarks.length > 0) {
-                    sections.push({
-                        id: folder.id,
-                        title: folder.title,
-                        bookmarks: folder.bookmarks
-                    });
-                    hasContent = true;
-                }
-            });
+            sections = this.getVisibleSections(data);
+            hasContent = sections.length > 0;
         }
 
         // 根据是否有内容显示相应内容
@@ -939,17 +925,66 @@ class MarkLauncher {
      */
     filterBookmarks(data) {
         const searchTerm = this.searchTerm.toLowerCase();
-        let allBookmarks = [...data.bookmarks];
-
-        data.folders.forEach(folder => {
-            allBookmarks = allBookmarks.concat(folder.bookmarks);
-        });
+        const allBookmarks = this.getVisibleBookmarks(data);
 
         return allBookmarks.filter(bookmark =>
             bookmark.title.toLowerCase().includes(searchTerm) ||
             bookmark.url.toLowerCase().includes(searchTerm) ||
             bookmark.folderPath.some(path => path.toLowerCase().includes(searchTerm))
         );
+    }
+
+    getVisibleSections(data) {
+        if (this.currentFolderId && this.currentFolderId !== 'root') {
+            const folder = data.folders.find(item => item.id === this.currentFolderId);
+
+            if (!folder || folder.bookmarks.length === 0) {
+                return [];
+            }
+
+            return [{
+                id: folder.id,
+                title: folder.title,
+                bookmarks: folder.bookmarks
+            }];
+        }
+
+        const sections = [];
+
+        if (data.bookmarks.length > 0) {
+            sections.push({
+                id: 'root',
+                title: t('bookmarks_bar_title'),
+                bookmarks: data.bookmarks
+            });
+        }
+
+        data.folders.forEach(folder => {
+            if (folder.bookmarks.length > 0) {
+                sections.push({
+                    id: folder.id,
+                    title: folder.title,
+                    bookmarks: folder.bookmarks
+                });
+            }
+        });
+
+        return sections;
+    }
+
+    getVisibleBookmarks(data) {
+        if (this.currentFolderId && this.currentFolderId !== 'root') {
+            const folder = data.folders.find(item => item.id === this.currentFolderId);
+            return folder?.bookmarks ? [...folder.bookmarks] : [];
+        }
+
+        let allBookmarks = [...data.bookmarks];
+
+        data.folders.forEach(folder => {
+            allBookmarks = allBookmarks.concat(folder.bookmarks);
+        });
+
+        return allBookmarks;
     }
 
     /**
@@ -982,26 +1017,15 @@ class MarkLauncher {
     renderBookmarkItem(bookmark) {
         const isPinned = this.isBookmarkedPinned(bookmark.url);
         const pinnedClass = isPinned ? ' pinned' : '';
+        const bookmarkTitle = this.escapeHtml(bookmark.title);
+
         return `
-            <div class="bookmark-item${pinnedClass}" data-url="${bookmark.url}" data-id="${bookmark.id}">
+            <div class="bookmark-item${pinnedClass}" data-url="${bookmark.url}" data-id="${bookmark.id}" title="${bookmarkTitle}">
                 <div class="bookmark-favicon">
-                    <img src="${bookmark.favicon}" alt="${bookmark.title}" loading="lazy"
-                         style="width: 24px; height: 24px; border-radius: 4px;">
+                    <img src="${bookmark.favicon}" alt="${bookmarkTitle}" loading="lazy">
                 </div>
                 <div class="bookmark-info">
-                    <div class="bookmark-title">${this.escapeHtml(bookmark.title)}</div>
-                </div>
-                <div class="bookmark-actions">
-                    <button class="action-btn copy-url" title="复制链接" data-url="${bookmark.url}">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                        </svg>
-                    </button>
-                    <button class="action-btn open-new" title="新标签页打开" data-url="${bookmark.url}">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
-                        </svg>
-                    </button>
+                    <div class="bookmark-title">${bookmarkTitle}</div>
                 </div>
             </div>
         `;
@@ -1034,10 +1058,6 @@ class MarkLauncher {
         this.applyFaviconColorToCard(item);
 
         item.addEventListener('click', (e) => {
-            if (e.target.closest('.bookmark-actions')) {
-                return;
-            }
-
             const url = item.dataset.url;
             if (e.ctrlKey || e.metaKey) {
                 if (chrome.tabs && chrome.tabs.create) {
@@ -1049,29 +1069,6 @@ class MarkLauncher {
                 window.location.href = url;
             }
         });
-
-        // 操作按钮事件
-        const copyBtn = item.querySelector('.copy-url');
-        const newTabBtn = item.querySelector('.open-new');
-
-        if (copyBtn) {
-            copyBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.copyToClipboard(copyBtn.dataset.url);
-                // showToast已在copyToClipboard方法中处理
-            });
-        }
-
-        if (newTabBtn) {
-            newTabBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (chrome.tabs && chrome.tabs.create) {
-                    chrome.tabs.create({ url: newTabBtn.dataset.url });
-                } else {
-                    window.open(newTabBtn.dataset.url, '_blank');
-                }
-            });
-        }
     }
 
     /**
@@ -1182,10 +1179,9 @@ class MarkLauncher {
                 dominantColor = { r: 128, g: 128, b: 128 };
             }
 
-            // 应用颜色到卡片背景（5%透明度）
-            const rgbColor = `rgba(${dominantColor.r}, ${dominantColor.g}, ${dominantColor.b}, 0.05)`;
+            // 应用颜色到卡片背景变量，交给 CSS 统一混合
+            const rgbColor = `rgba(${dominantColor.r}, ${dominantColor.g}, ${dominantColor.b}, 0.18)`;
             item.style.setProperty('--favicon-color', rgbColor);
-            item.style.backgroundColor = 'var(--favicon-color)';
 
         } catch (error) {
             console.error('提取图标颜色失败:', error);
@@ -1892,6 +1888,16 @@ class MarkLauncher {
         const bookmarkTitle = this.contextMenuTarget.querySelector('.bookmark-title')?.textContent || '未知网站';
 
         switch (action) {
+            case 'open_new_tab':
+                if (chrome.tabs && chrome.tabs.create) {
+                    chrome.tabs.create({ url: bookmarkUrl });
+                } else {
+                    window.open(bookmarkUrl, '_blank');
+                }
+                break;
+            case 'copy_link':
+                this.copyToClipboard(bookmarkUrl);
+                break;
             case 'pin':
                 this.pinBookmark(bookmarkUrl);
                 break;

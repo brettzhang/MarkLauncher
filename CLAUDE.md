@@ -7,15 +7,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **MarkLauncher** 是一个 Chrome 浏览器新标签页扩展，替代默认新标签页，提供书签管理和快速访问功能。
 
 **核心特性：**
-- 左侧文件夹导航（Chrome 书签栏/其他书签），支持折叠/展开
+- 左侧文件夹导航（Chrome 书签栏/其他书签），点击分组后右侧仅显示当前分组，`All` 显示全部
 - 双模式搜索（书签搜索 + 网络搜索），Tab键切换模式
 - 网络搜索使用浏览器默认搜索引擎（Chrome Search API）
-- 响应式 Material Design 界面，支持深色主题
+- 响应式紧凑界面，支持深色主题
 - 键盘快捷键支持（Ctrl+K 聚焦搜索，ESC 关闭弹窗）
-- 二维码生成功能（简化界面）
+- 右键菜单支持新标签页打开、复制链接、置顶/取消置顶、二维码分享
 - 国际化支持（中英文）
 - 设置系统（主题切换）
-- **智能卡片背景色**：自动从书签图标提取主色调并设置为卡片背景色（5%透明度）
+- **智能卡片背景色**：自动从书签图标提取主色调并设置为详情卡片和置顶图标背景
 
 ## 技术架构
 
@@ -68,11 +68,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 发布流程
 ```bash
 # 创建并推送版本 tag（自动触发 GitHub Actions 发布）
-git tag v1.0.5
-git push origin v1.0.5
+git tag v1.0.6
+git push origin v1.0.6
 
 # Workflow 会自动：
-# 1. 打包 extension/ 目录为 marklauncher-v1.0.5.zip
+# 1. 打包 extension/ 目录为 marklauncher-v1.0.6.zip
 # 2. 创建 GitHub Release
 # 3. 上传 zip 文件到 Release
 ```
@@ -105,7 +105,7 @@ git push origin v1.0.5
 - 统计像素颜色频率（采样步长4）
 - 过滤透明、纯白、纯黑色
 - 颜色量化减少数量（16级）
-- 应用为卡片背景色（5%透明度 rgba）
+- 应用为 CSS 变量驱动的详情卡片与置顶图标背景色
 - 处理 CORS 错误和加载失败
 - 在 `bindBookmarkItemEvents()` 中自动触发
 
@@ -149,12 +149,13 @@ git push origin v1.0.5
 - **实时过滤**: 支持标题、URL、文件夹搜索
 
 ### 侧边栏功能
-- **折叠/展开**: 支持左侧导航栏状态切换
+- **分组过滤**: 点击左侧分组后，右侧仅渲染当前分组内容
+- **All 视图**: 仅在选择 `All` 时显示全部分组
+- **移动端抽屉**: 小屏幕下使用抽屉式导航
 - **低调配色**: 激活状态使用灰色系（非蓝色高调）
-- **状态持久化**: localStorage 存储侧边栏状态
 
 ### 二维码功能
-- **右键菜单**: 上下文菜单生成二维码
+- **右键菜单**: 上下文菜单包含新标签页打开、复制链接、置顶/取消置顶、二维码分享
 - **本地生成**: qrcode-generator 库
 - **简化界面**: 只显示标题、二维码和复制链接按钮
 - **ESC 关闭**: 支持键盘快捷键关闭
@@ -164,7 +165,8 @@ git push origin v1.0.5
 - **Canvas API**: 使用 getImageData 获取像素数据
 - **性能优化**: 32x32 小尺寸，采样步长4
 - **CORS 处理**: 跨域图标使用默认背景色
-- **透明度**: 5% rgba 颜色，微妙视觉效果
+- **应用范围**: 详情列表卡片背景、置顶区域图标容器背景
+- **混合方式**: JavaScript 设置 `--favicon-color`，CSS 叠加透明渐层
 
 ### 主题系统
 - **CSS变量**: `:root` 和 `[data-theme="dark"]` 定义
@@ -197,7 +199,7 @@ git push origin v1.0.5
 - Chrome Extension V3 配置
 - 定义权限和入口点
 - 设置新标签页覆盖
-- 当前版本: 1.0.5
+- 当前版本: 1.0.6
 
 ### newtab.js (MarkLauncher 类)
 **重要方法**：
@@ -229,8 +231,8 @@ git push origin v1.0.5
 - `--text-primary: #F5F5F7`
 
 **特殊样式**：
-- `.bookmark-item`: 卡片背景色使用内联 `--favicon-color` 变量
-- `.empty-state`: 与有数据时宽度一致
+- `.bookmark-item`: 卡片背景色使用 `--favicon-color` 变量混合生成
+- `.empty-state`: 空状态使用透明背景，不再显示提示卡片底色
 - 左侧导航激活状态使用低调灰色，非蓝色
 - 设置面板添加 `overflow-x: hidden` 防止水平滚动条
 
@@ -269,6 +271,13 @@ git push origin v1.0.5
 - 不支持 Firefox/Safari（不同扩展 API）
 
 ## 版本历史
+- **v1.0.6**:
+  - 调整整体界面为更紧凑的卡片与侧边导航样式
+  - 左侧导航点击分组后，右侧仅显示当前分组，`All` 显示全部
+  - 书签卡片内 hover 操作移除，统一迁移到右键菜单
+  - 置顶区域改为无标题快捷区，并增强图标取色背景表现
+  - 搜索框改为透明背景 + 边框样式
+  - 搜索无结果和无书签提示取消背景卡片
 - **v1.0.5**:
   - 使用 Chrome Search API 实现网络搜索（移除搜索引擎配置）
   - 移除同步状态显示
